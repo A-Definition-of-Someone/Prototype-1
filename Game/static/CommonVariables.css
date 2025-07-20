@@ -1,0 +1,25 @@
+:root{
+    --BorderRoseColoured: 2pt solid #EA6B66;
+    --BorderCornflowerblueColoured: 2pt solid Cornflowerblue;
+    --BorderBeigeColoured: 2pt solid beige;
+    --BorderBlackColoured: 2pt solid black;
+    --BorderDandelionColoured: 2pt solid #FFD966;
+
+    --FontSizeApprox35PX: clamp(0.5rem, 5dvw, 2.1875rem);
+    --FontSizeApprox30PX: clamp(0.5rem, 5dvw, 1.875rem);
+    --FontSizeApprox25PX: clamp(0.5rem, 5dvw, 1.5625rem);
+    --FontSizeApprox23PX: clamp(0.5rem, 5dvw, 1.4375rem);
+    --FontSizeApprox21PX: clamp(0.5rem, 5dvw, 1.3125rem);
+    --FontSizeApprox20PX: clamp(0.5rem, 5dvw, 1.25rem);
+    --FontSizeApprox19PX: clamp(0.5rem, 5dvw, 1.1875rem);
+    --FontSizeApprox17PX: clamp(0.5rem, 5dvw, 1.0625rem);
+    --FontSizeApprox16PX: clamp(0.5rem, 5dvw, 1rem);
+
+    --FontFamilyMain: Helvetica, Arial;
+
+    --ColourRose: #EA6B66;
+    --ColourGray: #647687;
+    --ColourLightBlue: #C7D5E9;
+    --ColourPeach: #FFF4C3;
+    --ColourDandelion: #FFD966;
+}
