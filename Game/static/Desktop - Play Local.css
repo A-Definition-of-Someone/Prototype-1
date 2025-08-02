@@ -1,0 +1,281 @@
+html, body{
+    /*Ensures no overflow when using 100dvh and 100dvw*/
+    margin: 0;
+    padding: 0;
+}
+body{
+    /*Preparing for layers*/
+    position: relative;
+}
+
+#MainLayout{
+    display: grid;
+    width: 100dvw;
+    height: 100dvh;
+    background-color: var(--ColourLightBlue);
+
+    /*Grid Config*/
+    grid-template-areas: 
+    "Menu ChessboardLayout Match"
+    "Menu Options          Match";
+    grid-template-rows: 
+    minmax(0,6fr) minmax(0,1fr);
+    grid-template-columns: 
+    minmax(0, 1.2fr) minmax(0, 5fr) minmax(0, 1.5fr);
+    row-gap: 0.5dvh;
+}
+
+#MainLayout:has(#Menu[data-collapse = "1"]){
+    /*Grid Config*/
+    grid-template-columns: 
+    minmax(0,0.5fr)  minmax(0, 5fr)  minmax(0,1.5fr);
+}
+
+#ChessboardLayout{
+    display: grid;
+    min-width: 60%;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1 / 1;
+
+    /*Grid Config*/
+    grid-area: ChessboardLayout;
+    place-self: center center;
+
+    /*Scroll Behaviour*/
+    overflow: hidden;
+}
+
+#MainLayout:has(#Menu[data-collapse = "1"]) #ChessboardLayout{
+    min-width: 55%;
+}
+
+#Options{
+    display: grid;
+    min-width: 45%;
+    height: 65%;
+
+    /*Grid Config*/
+    grid-area: Options;
+    grid-auto-flow: column;
+    column-gap: 1dvw;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    place-self: start center;
+    box-sizing: border-box;
+}
+
+#Options button{
+     background-color: var(--ColourGray);
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox35PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: white;
+}
+
+#Match{
+    display: grid;
+    height: 100%;
+    width: 100%;
+    background-color: white;
+
+    /*Grid Config*/
+    grid-area: Match;
+    grid-auto-flow: row;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 5fr) minmax(0, 1fr);
+    grid-template-columns: 100%;
+    row-gap: 1dvh;
+}
+
+.PlayerContainer{
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+     /*Grid Config*/
+     grid-auto-flow: row;
+     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+
+     /*Border*/
+     border: var(--BorderRoseColoured);
+     box-sizing: border-box;
+}
+
+.PlayerName{
+    display: grid;
+    background-color: beige;
+
+    /*Grid Config*/
+    place-content: center center;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox23PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: black;
+    text-align: center;
+}
+
+.PlayerTime{
+    display: grid;
+    background-color: var(--ColourRose);
+
+    /*Grid Config*/
+    place-content: center center;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox30PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: beige;
+    text-align: center;
+}
+
+#ChessMovements{
+    display: grid;
+    height: 100%;
+    width: 100%;
+    background-color: white;
+
+    /*Grid Config*/
+    grid-auto-flow: row;
+    grid-auto-rows: min-content;
+    row-gap: 1dvh;
+
+    /*Border*/
+     border: var(--BorderCornflowerblueColoured);
+     box-sizing: border-box;
+
+     /*Padding*/
+     padding-top: 1dvh;
+
+     /*Scrolling*/
+     overflow-y: auto;
+     scrollbar-width: thin;
+}
+
+#ChessMovements_Header{
+    display: grid;
+    
+    /*Grid Config*/
+    place-content: center center;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox25PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: black;
+    text-align: center;
+
+    /*Border*/
+    box-sizing: border-box;
+
+    /*Padding*/
+    padding-bottom: 1dvh;
+}
+
+#ChessMovements_Sides_Header{
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+    /*Grid Config*/
+    grid-auto-flow: column;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+#ChessMovements_Sides_Header span:nth-child(1){
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+    /*Grid Config*/
+    place-content: center start;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox20PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: black;
+    text-align: left;
+}
+
+#ChessMovements_Sides_Header span:nth-child(2),
+#ChessMovements_Sides_Header span:nth-child(3){
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+    /*Grid Config*/
+    place-content: center center;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox20PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: black;
+    text-align: center;
+}
+
+.ChessMovements_Sides{
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+    /*Grid Config*/
+    grid-auto-flow: column;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.ChessMovements_Sides span:nth-child(1){
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+    /*Grid Config*/
+    place-content: center center;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox20PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: black;
+    text-align: center;
+}
+
+.ChessMovements_Sides span:nth-child(2),
+.ChessMovements_Sides span:nth-child(3){
+    display: grid;
+    height: 100%;
+    width: 100%;
+
+    /*Grid Config*/
+    place-content: center center;
+
+    /*Font*/
+    font-family: var(--FontFamilyMain);
+    font-size: var(--FontSizeApprox20PX);
+    font-weight: bold;
+
+    /*Text*/
+    color: black;
+    text-align: center;
+}
+

@@ -4,12 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play Local</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'CommonVariables.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'Desktop - Prompt - Challenge.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'Desktop - Menu.css' %}">
+    <link rel="stylesheet" href="{% static 'Desktop - Play Local.css' %}?v=1.0">
 </head>
 <body>
-    
-    <span>{{Target}}</span>
-    <span>{{Config}}</span>
-    <span>{{Side}}</span>
-    <input type="hidden" value="{{csrfmiddlewaretoken}}" name="csrfmiddlewaretoken">
+    <form id="Prompt-Challenge-Player" data-prompt-hidden = "true" data-target = "0">
+        <span id="Prompt-Challenge-Header">Challenge Player #1 to a game of:</span>
+        <div id="Prompt-Challenge-Gap1"></div>
+        <div id="Prompt-Challenge-Option-Container">
+            <div class="Prompt-Challenge-Option" data-chosen="true">Bullet 1 + 0</div>
+            <div class="Prompt-Challenge-Option">Blitz 3 + 0</div>
+            <div class="Prompt-Challenge-Option">Blitz 3 + 2</div>
+            <div class="Prompt-Challenge-Option">Blitz 5 + 0</div>
+            <div class="Prompt-Challenge-Option">Rapid 10 + 0</div>
+            <div class="Prompt-Challenge-Option">Rapid 20 + 0</div>
+        </div>
+        <div id="Prompt-Challenge-Gap2"></div>
+        <span id="Prompt-Challenge-SubHeader">Choose which chess side to be:</span>
+        <div id="Prompt-Challenge-Side" data-chosen="White">
+            <img src="{% static 'Resources/White Knight.png' %}" alt="" id="Prompt-Challenge-Side-White">
+            <span id="Prompt-Challenge-Side-VS">VS</span>
+            <img src="{% static 'Resources/Black Knight.png' %}" alt="" id="Prompt-Challenge-Side-Black">
+        </div>
+        <div id="Prompt-Challenge-Error" data-error="0" >Connection Error: Unable to reach server</div>
+        <div id="Prompt-Challenge-Operation">
+            <span id="Prompt-Challenge-Operation-Cancel">Cancel</span>
+            <input type="submit" value="Challenge" id="Prompt-Challenge-Operation-Challenge">
+        </div>
+    </form>
+    <div id="MainLayout">
+        {% include "Desktop - Menu.html" %}
+        <!--
+        <span>{{Target}}</span>
+        <span>{{Config}}</span>
+        <span>{{Side}}</span>
+        <input type="hidden" value="{{csrfmiddlewaretoken}}" name="csrfmiddlewaretoken">
+    -->
+        <canvas id="ChessboardLayout">
+            
+        </canvas>
+        <div id="Options">
+            <button>Offer Draw</button>
+            <button>Forfeit</button>
+        </div>
+        <div id="Match">
+            <div class ="PlayerContainer">
+                <span class="PlayerName">Black</span>
+                <span class="PlayerTime">10:00</span>
+            </div>
+            <div id="ChessMovements">
+                <span id="ChessMovements_Header">Chess Movements</span>
+                <div id="ChessMovements_Sides_Header">
+                    <span></span>
+                    <span>White</span>
+                    <span>Black</span>
+                    <div></div>
+                </div>
+                <div class="ChessMovements_Sides">
+                    <span>#1</span>
+                    <span>Pd4</span>
+                    <span>Pd5</span>
+                    <div></div>
+                </div>
+                <div class="ChessMovements_Sides">
+                    <span>#2</span>
+                    <span>Nc3</span>
+                    <span>Nf6</span>
+                    <div></div>
+                </div>
+            </div>
+            <div class ="PlayerContainer">
+                <span class="PlayerName">White</span>
+                <span class="PlayerTime">10:00</span>
+            </div>
+        </div>
+    </div>
 </body>
+<!--Temporary, just to have a chessboard render. Later need to replace with the one where you can move the chess-->
+<!--<script src="{% static 'Render Chessboard.js' %}?v=1.0"></script>-->
+<script src="{% static 'Render Chessboard.js' %}?v=1.0"></script>
+<script>
+    /*Menu*/
+        let MenuCollapseBTN = document.getElementById("Menu-CollapseBTN");
+        let Menu = document.getElementById("Menu");
+        let MenuOption1 = Menu.querySelector(".Menu-Option:nth-child(3)");
+        let MenuOption2 = Menu.querySelector(".Menu-Option:nth-child(4)");
+        let MenuOption3 = Menu.querySelector(".Menu-Option:nth-child(5)");
+        let switchCollapse = [1,0];
+
+        MenuCollapseBTN.addEventListener("click",()=>{
+            Menu.dataset.collapse = switchCollapse[Menu.dataset.collapse];
+        });
+        MenuOption1.addEventListener("click", justTriggerChallenge);
+        MenuOption2.addEventListener("click",justTriggerLogin);
+        MenuOption3.addEventListener("click",justTriggerLogin);
+</script>
 </html>
