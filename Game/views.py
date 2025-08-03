@@ -80,14 +80,31 @@ async def PlayLocal(request):
             return HttpResponse("OK")
         return HttpResponse("Fill the form properly!")
     elif request.method == "GET":
-        return render(
-            request,
-            "Desktop - Play Local.html",
-            {"Target": await request.session.aget("PlayerUsername"),
-             "Config": await request.session.aget("Gamemode"),
-             "Side": await request.session.aget("Side"),
-             "csrfmiddlewaretoken": await request.session.aget("csrfmiddlewaretoken"),
-             })
+        token_isExist = await request.session.ahas_key("csrfmiddlewaretoken")
+        if token_isExist:
+            Token = await request.session.aget("csrfmiddlewaretoken")
+            result = await Account.objects.filter(Token = Token).afirst()
+            
+            if result is None: #Not Logged In
+                return render(
+                    request,
+                    'NotLoggedIn/Desktop - Play Local.html',
+                    {
+                        "Target": await request.session.aget("PlayerUsername"),
+                        "Config": await request.session.aget("Gamemode"),
+                        "Side": await request.session.aget("Side"),
+                        "csrfmiddlewaretoken": await request.session.aget("csrfmiddlewaretoken"),
+                    }
+                    )
+            return render(
+                request,
+                "LoggedIn/Desktop - Play Local.html",
+                {
+                    "Target": await request.session.aget("PlayerUsername"),
+                    "Config": await request.session.aget("Gamemode"),
+                    "Side": await request.session.aget("Side"),
+                    "csrfmiddlewaretoken": await request.session.aget("csrfmiddlewaretoken"),
+                 })
     return HttpResponse("Please use POST or GET")
 
 async def PlayMultiplayer(request):

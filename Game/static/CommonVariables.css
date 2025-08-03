@@ -4,6 +4,7 @@
     --BorderBeigeColoured: 2pt solid beige;
     --BorderBlackColoured: 2pt solid black;
     --BorderDandelionColoured: 2pt solid #FFD966;
+    --BorderShadowColoured: 2pt solid #A9B8C7;
 
     --FontSizeApprox35PX: clamp(0.5rem, 5dvw, 2.1875rem);
     --FontSizeApprox30PX: clamp(0.5rem, 5dvw, 1.875rem);
