@@ -9,14 +9,14 @@ export class ChessTile{
      */
     constructor(chesspiece, callable){
         this.chesspiece = chesspiece;
-        this.callable = callable;
+        this.callable = new Array(callable);
     }
 
     get ChessPiece(){return this.chesspiece;}
     get Callable(){return this.callable;}
     
     set ChessPiece(chesspiece){this.chesspiece = chesspiece;}
-    set Callable(callable){this.callable = callable;}
+    set Callable(callable){this.callable.push(callable);}
 }
 
 /**
@@ -58,13 +58,15 @@ export function setNeutralTile(){
  */
 export function setEnPassantMe(side, targetTile){
     let _side = side;
+    let _targetTile = targetTile;
     /**
      * @param {ChessPiece} chesspiece
      */
     return (chesspiece)=>{
         if (chesspiece.Side !== _side && chesspiece.ClassName === "Pawn"){
             /* Remove the pawn */
-            targetTile.chesspiece = new ChessPiece(Side.Neutral);
+            let temp = _targetTile.ChessPiece;
+            _targetTile.chesspiece = new ChessPiece(Side.Neutral, temp.Row, temp.Col);
             return {status: "EnPassant", candidate: chesspiece};
         }
         return {status: "JustLanding", candidate: chesspiece};

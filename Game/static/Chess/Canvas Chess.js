@@ -140,12 +140,21 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
         let piece1Row = piece1Info._x;
         let piece1Col = piece1Info._y;
 
+        let piece2Row = piece2Info._x;
+        let piece2Col = piece2Info._y;
+
+        let piece1piece = piece1Info.target;
+        let piece2piece = piece2Info.target;
+
         /* Check if pawn move to empty tile */
         if (
             piece1Name !== ChessTypes.ChessPiece && piece1Side === currentSide
             && piece2Name !== ChessTypes.King && piece2Side !== currentSide
         ){
-            if(true){ /* Pretend its true */
+            if(isMoveAble(
+                chessdata, currentSide, piece1piece, 
+                piece2Row, piece2Col
+            )){ /* Pretend its true */
                 /* Move */
                 targetpieces = [];
                 let details = lastclicks.pop();
@@ -366,10 +375,10 @@ function Data2Canvas(chessdata){
  * @param {Array<Array<ChessTile>>} chessdata 
  * @param {string} currentside 
  * @param {ChessPiece} chesspiece 
- * @param {number} targetRow 
- * @param {number} targetCol 
+ * @param {ChessPiece} targetpiece
+ * @returns {boolean} true if the chess piece can move to the target tile, false otherwise
  */
-function isMoveAble(chessdata, currentside, chesspiece, targetRow, targetCol){
+function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     /* Note: P1 King Coord extract and insert coord must + 1 */
     let P1_KingCoord = getP1KingCoord();
     let P2_KingCoord = getP2KingCoord();
@@ -381,22 +390,157 @@ function isMoveAble(chessdata, currentside, chesspiece, targetRow, targetCol){
     let currentRow = chesspiece.Row;
     let currentCol = chesspiece.Col;
 
+    let inDanger = false;
     let currentCallable = chessdata[currentRow][currentCol].Callable;
+    currentCallable.forEach((callable)=>{
+        if(callable(currentside) === Status.Block){
+            inDanger = true;
+        }
+    });
     /* If this piece does not have block status, it means the kng is liekly not under attack
     or this piece is too far to cover the king anyway*/
-    if(currentCallable === Status.Block){
+    if(inDanger){
         /* Check if the piece is in the same row but diferent columns - left and right */
-        if(currentRow === king.Row && currentCol <= king.Col && currentCol != 0){
+        if(currentRow === king.Row && currentCol <= king.Col && currentCol !== 0){
             for (let index = currentCol - 1; index >= 0; index--) {
-                
+                let temp = chessdata[currentRow][index].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Rook)
+                ){
+                    return false;
+                }
+                    
+            }
+        }
+        else if(currentRow === king.Row && currentCol >= king.Col && currentCol !== 7){
+            for (let index = currentCol + 1; index < Cols; index++) {
+                let temp = chessdata[currentRow][index].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Rook)
+                ){
+                    return false;
+                }
+                    
             }
         }
         /* Check if the piece is in the same column but diferent rows - top and bottom */
+        else if(currentCol === king.Col && currentRow > king.Row && currentRow !== 7){
+            for (let index = currentRow + 1; index < Rows; index++) {
+                let temp = chessdata[index][currentCol].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Rook)
+                ){
+                    return false;
+                }
+                    
+            }
+        }
+        else if(currentCol === king.Col && currentRow < king.Row && currentRow !== 0){
+            for (let index = currentRow - 1; index >= 0; index--) {
+                let temp = chessdata[index][currentCol].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Rook)
+                ){
+                    return false;
+                }
+                    
+            }
+        }
         /* Check if the piece is diagonal but right side - top and bottom */
+        else if(currentRow > king.Row && currentCol > king.Col && currentRow !== 7 && currentCol !== 7){
+            let tempCol = currentCol + 1;
+            for (let index = currentRow + 1; index < Rows; index++) {
+                let temp = chessdata[index][tempCol].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Bishop)
+                ){
+                    return false;
+                }
+                tempCol++;
+            }
+        }
+        else if(currentRow < king.Row && currentCol > king.Col && currentRow !== 0 && currentCol !== 8){
+            let tempCol = currentCol + 1;
+            for (let index = currentRow - 1; index >= 0; index--) {
+                let temp = chessdata[index][tempCol].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Bishop)
+                ){
+                    return false;
+                }
+                tempCol++;
+            }
+        }
         /* Check if the piece is diagonal but left side - top and bottom */
+        else if(currentRow > king.Row && currentCol < king.Col && currentRow !== 7 && currentCol !== 0){
+            let tempCol = currentCol - 1;
+            for (let index = currentRow + 1; index < Rows; index++) {
+                let temp = chessdata[index][tempCol].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Bishop)
+                ){
+                    return false;
+                }
+                tempCol--;
+            }
+        }
+        else if(currentRow < king.Row && currentCol < king.Col && currentRow !== 0 && currentCol !== 0){
+            let tempCol = currentCol - 1;
+            for (let index = currentRow - 1; index >= 0; index--) {
+                let temp = chessdata[index][tempCol].ChessPiece;
+                if(temp.ClassName !== ChessTypes.ChessPiece && temp.Side === currentside){
+                    break;
+                }
+                else if(
+                    temp.ClassName !== ChessTypes.ChessPiece && temp.Side !== currentside
+                    && (temp.ClassName === ChessTypes.Queen || temp.ClassName === ChessTypes.Bishop)
+                ){
+                    return false;
+                }
+                tempCol--;
+            }
+        }
+
+        
     }
 
-    
+    /* If No danger to the king when this piece moves,
+    * Send coordinates to the chess piece to see if the distance is valid
+    */
+   if(chesspiece.Move(targetpiece)){
+
+   }
+
+    /* Assume its true for the meantime */
+    return true;
     
 }
 

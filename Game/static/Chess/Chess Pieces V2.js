@@ -1,4 +1,4 @@
-import { ChessTypes } from "./Chess Constants.js";
+import { ChessTypes, Status } from "./Chess Constants.js";
 export class ChessPiece{
     /**
      * @param {string} side Use Side constant from Chess Constants module
@@ -11,10 +11,10 @@ export class ChessPiece{
 
     /**
      * 
-     * @param {number} row2 Row of the destination
-     * @param {number} col2 Col of the destination
+     * @param {ChessPiece} chesspiece
+     * @param {Array<Function>} callables  
      */
-    Move(row2, col2){
+    Move(chesspiece, callables){
 
     }
 
@@ -34,6 +34,50 @@ export class P1_Pawn extends ChessPiece{
         super(side, row, col);
     }
     get ClassName(){return ChessTypes.Pawn;}
+
+    /**
+     * 
+     * @param {ChessPiece} chesspiece
+     * @param {Array<Function>} callables  
+     * @returns {boolean}
+     */
+    Move(chesspiece, callables){
+        let enPassant = false;
+        callables.forEach(callable => {
+            if(callable(currentside) === Status.EnPassant){
+                enPassant = true;
+            }
+        });
+
+        if (
+            enPassant && chesspiece.ClassName === ChessTypes.ChessPiece 
+            && chesspiece.Side !== this.Side && chesspiece.Side !== Side.Neutral
+            && chesspiece.Row === this.Row
+            && (chesspiece.Col - this.Col === 1 || chesspiece.Col - this.Col === -1)
+        ){
+            return true;  
+        }
+
+        if (
+            chesspiece.ClassName === ChessTypes.ChessPiece
+            && chesspiece.Side !== this.Side
+            && ((chesspiece.Row - this.Row === 2 && chesspiece.Col === this.Col)
+            || (chesspiece.Row - this.Row === 1 && chesspiece.Col === this.Col))
+        ){
+            return true;
+        }
+
+        if (
+            chesspiece.ClassName !== ChessTypes.ChessPiece
+            && chesspiece.Side !== this.Side
+            && chesspiece.ClassName !== ChessTypes.King
+            && chesspiece.Row - this.Row === 1 && chesspiece.Col === this.Col
+        ){
+            return true;
+        }
+
+        return false; 
+    }
 }
 
 export class P2_Pawn extends ChessPiece{
@@ -41,6 +85,50 @@ export class P2_Pawn extends ChessPiece{
         super(side, row, col);
     }
     get ClassName(){return ChessTypes.Pawn;}
+
+    /**
+     * 
+     * @param {ChessPiece} chesspiece
+     * @param {Array<Function>} callables  
+     * @returns {boolean}
+     */
+    Move(chesspiece, callables){
+        let enPassant = false;
+        callables.forEach(callable => {
+            if(callable(currentside) === Status.EnPassant){
+                enPassant = true;
+            }
+        });
+
+        if (
+            enPassant && chesspiece.ClassName === ChessTypes.ChessPiece 
+            && chesspiece.Side !== this.Side && chesspiece.Side !== Side.Neutral
+            && chesspiece.Row === this.Row
+            && (chesspiece.Col - this.Col === 1 || chesspiece.Col - this.Col === -1)
+        ){
+            return true;  
+        }
+
+        if (
+            chesspiece.ClassName === ChessTypes.ChessPiece
+            && chesspiece.Side !== this.Side
+            && ((chesspiece.Row - this.Row === -2 && chesspiece.Col === this.Col)
+            || (chesspiece.Row - this.Row === -1 && chesspiece.Col === this.Col))
+        ){
+            return true;
+        }
+
+        if (
+            chesspiece.ClassName !== ChessTypes.ChessPiece
+            && chesspiece.Side !== this.Side
+            && chesspiece.ClassName !== ChessTypes.King
+            && chesspiece.Row - this.Row === -1 && chesspiece.Col === this.Col
+        ){
+            return true;
+        }
+
+        return false; 
+    }
 }
 
 export class P1_Rook extends ChessPiece{
