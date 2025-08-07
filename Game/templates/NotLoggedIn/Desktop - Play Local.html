@@ -122,10 +122,10 @@ No Winner</pre>
 </body>
 <!--Temporary, just to have a chessboard render. Later need to replace with the one where you can move the chess-->
 <!--<script src="{% static 'Render Chessboard.js' %}?v=1.0"></script>-->
-<script src="{% static 'Render Chessboard.js' %}?v=1.0"></script>
-<script src="{% static 'Play Local.js' %}?v=1.0"></script>
-<script>
-    /*P;ayers' Details*/
+<script type="module">
+    import {React2Canvas} from "{% static 'Chess/Canvas Chess.js' %}?v=1.2";
+
+    /*Players' Details*/
     let Player1Name = "{{Side}}";
     let Player2Name = "{% if Side == 'White' %} Black {% else %} White {% endif %}";
 
@@ -312,6 +312,12 @@ No Winner</pre>
             OfferDraw.disabled = true;
             Forfeit.disabled = true;
         });
+
+        /*Canvas*/
+        React2Canvas(document.getElementById("ChessboardLayout"), "{{Side}}", "{% if Side == 'White' %}Black{% else %}White{% endif %}");
+        
+
+
 
 </script>
 </html>
