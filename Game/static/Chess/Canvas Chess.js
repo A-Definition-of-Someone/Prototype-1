@@ -8,6 +8,7 @@ let lastclicks = [];
 let targetpieces = [];
 let chessdata;
 let currentSide;
+let checkmate = false;
 const Rows = 8;
 const Cols = 8;
 const positionTextSize = 40;
@@ -89,143 +90,14 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
         lastclicks = [];
     }
 
+    /** @type {ChessPiece} */
     let targetPiece = chessdata[temp.row][temp.col].ChessPiece;
     let X = (temp.col * TileWidth) + boardOffset;
     let Y = (temp.row * TileHeight) + boardOffset;
     
-    if(lastclicks.length === 0 && targetPiece.Side === currentSide){
-        selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
+    if(!checkmate){
+        NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide);
     }
-    else if (lastclicks.length === 1 && targetPiece.Side === currentSide && targetPiece.ClassName === ChessTypes.King){
-        selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
-        for (let index = 0; index < 2; index++) {
-            console.log("TEST")
-            const details = lastclicks.pop();
-            ctx.putImageData(details.image, details._x, details._y);
-        }
-        
-    }
-    else if (lastclicks.length === 1 && targetPiece.Side === currentSide){
-        let details = lastclicks.pop();
-        ctx.putImageData(details.image, details._x, details._y);
-        selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
-    }
-
-    if(targetpieces.length >= 2){
-        targetpieces = [];
-    }
-    if(targetpieces.length === 1){
-        /* Check if the selected is duplicated or not */
-        if(targetpieces[0].target !== targetPiece){
-            targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
-        }
-    }else{
-        /* Ignore chesspiece */
-        if(targetPiece.ClassName !== ChessTypes.ChessPiece)
-        targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
-    }
-    /**
-     *  After Selecting a piece and what if second piece is selected
-     */
-    if(targetpieces.length === 2){
-        let piece1Info = targetpieces[0];
-        let piece2Info = targetpieces[1];
-
-        let piece1Name = piece1Info.target.ClassName;
-        let piece1Side = piece1Info.target.Side;
-
-        let piece2Name = piece2Info.target.ClassName;
-        let piece2Side = piece2Info.target.Side;
-
-        let piece1Row = piece1Info._x;
-        let piece1Col = piece1Info._y;
-
-        let piece2Row = piece2Info._x;
-        let piece2Col = piece2Info._y;
-
-        let piece1piece = piece1Info.target;
-        let piece2piece = piece2Info.target;
-
-        /* Check if pawn move to empty tile */
-        if (
-            piece1Name !== ChessTypes.ChessPiece && piece1Side === currentSide
-            && piece2Name !== ChessTypes.King && piece2Side !== currentSide
-        ){
-            if(isMoveAble(
-                chessdata, currentSide, piece1piece, 
-                piece2Row, piece2Col
-            )){ /* Pretend its true */
-                /* Move */
-                targetpieces = [];
-                let details = lastclicks.pop();
-                lastclicks = [];
-                ctx.putImageData(details.image, details._x, details._y);
-                let downscaling = 1.4;
-                let chesstype = 0;
-                let piece;
-                switch (piece1Name) {
-                    case ChessTypes.Pawn:
-                        chesstype = Pawn;
-                        break;
-                    case ChessTypes.Rook:
-                        chesstype = Rook;
-                        break;
-                    case ChessTypes.Knight:
-                        chesstype = Knight;
-                        break;
-                    case ChessTypes.Bishop:
-                        chesstype = Bishop;
-                        break;
-                    case ChessTypes.Queen:
-                        chesstype = Queen;
-                        downscaling = 1.5;
-                        break;
-                    case ChessTypes.King:
-                        chesstype = King;
-                        break;
-                    default:
-                        break;
-                }
-                switch (currentSide) {
-                    case Side.White:
-                        piece = whiteSide_IMGs[chesstype];
-                        break;
-                    case Side.Black:
-                        piece = blackSide_IMGs[chesstype];
-                        break;
-                    default:
-                        console.log("Invalid side:", currentSide);
-                        break;
-                }
-                
-                drawColouredTiles(temp.row, temp.col, ctx, TileWidth, TileHeight);
-                
-                draw(
-                    ctx, piece, temp.row, temp.col, 
-                    boardOffset, TileHeight, TileWidth, downscaling
-                );
-                
-                drawColouredTiles(piece1Row, piece1Col, ctx, TileWidth, TileHeight);
-
-                /* Switch turns */
-                currentSide = (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
-                console.log("Turn switched. Current side:", currentSide);
-                
-            }
-        }
-        /* Check if Rook move to an empty tile */
-        /* Check if castling */
-        else if(
-            piece1Name === ChessTypes.Rook && piece1Side === currentSide
-            && piece2Name === ChessTypes.King && piece2Side === currentSide
-        ){
-            if(true){ /* Pretend its true */
-                
-            }
-        }
-    }
-    console.log("lastclicks:", lastclicks);
-    alert("row: " + temp.row + " col: " + temp.col + " is " + targetPiece.ClassName);
 });
 
         
@@ -286,6 +158,9 @@ function drawColouredTiles(rowTile, columnTile, ctx, TileWidth, TileHeight){
 }
 
 function Data2Canvas(chessdata){
+    lastclicks = [];
+    targetpieces = [];
+
     let chessCanvas = document.getElementById("ChessboardLayout");
     let dpr = window.devicePixelRatio;
     let ctx = chessCanvas.getContext("2d", { willReadFrequently: true });
@@ -335,6 +210,7 @@ function Data2Canvas(chessdata){
                     break;
                 case ChessTypes.Bishop:
                     chesstype = Bishop;
+                    downscaling = 1.5;
                     break;
                 case ChessTypes.Queen:
                     chesstype = Queen;
@@ -391,6 +267,7 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     let currentCol = chesspiece.Col;
 
     let inDanger = false;
+    let enPassant = false;
     let currentCallable = chessdata[currentRow][currentCol].Callable;
     currentCallable.forEach((callable)=>{
         if(callable(currentside) === Status.Block){
@@ -535,13 +412,178 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     /* If No danger to the king when this piece moves,
     * Send coordinates to the chess piece to see if the distance is valid
     */
-   if(chesspiece.Move(targetpiece)){
-
+   if(chesspiece.Move(targetpiece, currentCallable, chessdata)){
+    if(enPassant){
+        /* Redraw everything as it will be easier for me to implement */
+        Data2Canvas(chessdata);
+    }
+    /* Deploy callables (especially Attack Range) */
+    chesspiece.AttackRange(chessdata, targetpiece);
+    chesspiece.ActuallyMove(chessdata, targetpiece);
+    return true;
    }
 
-    /* Assume its true for the meantime */
-    return true;
     
+    return false;
+    
+}
+/**
+ * 
+ * @param {Array} lastclicks 
+ * @param {ChessPiece} targetPiece 
+ * @param {Object} temp 
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {number} X 
+ * @param {number} Y 
+ * @param {string} currentPlayerSide 
+ * @param {string} opposingPlayerSide 
+ */
+function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide){
+    if(lastclicks.length === 0 && targetPiece.Side === currentSide){
+        selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
+    }
+    else if (
+        lastclicks.length === 1 && targetPiece.Side === currentSide 
+        && targetPiece.ClassName === ChessTypes.King
+    ){
+        selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
+        for (let index = 0; index < 2; index++) {
+            console.log("TEST")
+            const details = lastclicks.pop();
+            ctx.putImageData(details.image, details._x, details._y);
+        }
+        
+    }
+    else if (lastclicks.length === 1 && targetPiece.Side === currentSide){
+        let details = lastclicks.pop();
+        ctx.putImageData(details.image, details._x, details._y);
+        selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
+    }
+
+    if(targetpieces.length >= 2){
+        targetpieces.length = 0;
+    }
+    if(targetpieces.length === 1){
+        /* Check if the selected is duplicated or not */
+        if(targetpieces[0].target !== targetPiece){
+            targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
+        }else{
+            alert("You have selected the same piece twice");
+        }
+    }else{
+        /* Ignore chesspiece */
+        if(targetPiece.ClassName !== ChessTypes.ChessPiece)
+        targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
+    }
+    /**
+     *  After Selecting a piece and what if second piece is selected
+     */
+    if(targetpieces.length === 2){
+        let piece1Info = targetpieces[0];
+        let piece2Info = targetpieces[1];
+
+        let piece1Name = piece1Info.target.ClassName;
+        let piece1Side = piece1Info.target.Side;
+
+        let piece2Name = piece2Info.target.ClassName;
+        let piece2Side = piece2Info.target.Side;
+
+        let piece1Row = piece1Info._x;
+        let piece1Col = piece1Info._y;
+
+        let piece2Row = piece2Info._x;
+        let piece2Col = piece2Info._y;
+
+        let piece1piece = piece1Info.target;
+        let piece2piece = piece2Info.target;
+
+        /* Check if pawn move to empty tile */
+        if (
+            piece1Name !== ChessTypes.ChessPiece && piece1Side === currentSide
+            && piece2Name !== ChessTypes.King && piece2Side !== currentSide
+        ){
+            if(isMoveAble(
+                chessdata, currentSide, piece1piece, 
+                piece2piece
+            )){ 
+                /* Move */
+                targetpieces.length = 0;
+                let details = lastclicks.pop();
+                lastclicks.length = 0;
+                ctx.putImageData(details.image, details._x, details._y);
+                let downscaling = 1.4;
+                let chesstype = 0;
+                let piece;
+                switch (piece1Name) {
+                    case ChessTypes.Pawn:
+                        chesstype = Pawn;
+                        break;
+                    case ChessTypes.Rook:
+                        chesstype = Rook;
+                        break;
+                    case ChessTypes.Knight:
+                        chesstype = Knight;
+                        break;
+                    case ChessTypes.Bishop:
+                        chesstype = Bishop;
+                        downscaling = 1.5;
+                        break;
+                    case ChessTypes.Queen:
+                        chesstype = Queen;
+                        downscaling = 1.5;
+                        break;
+                    case ChessTypes.King:
+                        chesstype = King;
+                        break;
+                    default:
+                        break;
+                }
+                switch (currentSide) {
+                    case Side.White:
+                        piece = whiteSide_IMGs[chesstype];
+                        break;
+                    case Side.Black:
+                        piece = blackSide_IMGs[chesstype];
+                        break;
+                    default:
+                        console.log("Invalid side:", currentSide);
+                        break;
+                }
+                
+                drawColouredTiles(temp.row, temp.col, ctx, TileWidth, TileHeight);
+                
+                draw(
+                    ctx, piece, temp.row, temp.col, 
+                    boardOffset, TileHeight, TileWidth, downscaling
+                );
+                
+                drawColouredTiles(piece1Row, piece1Col, ctx, TileWidth, TileHeight);
+
+                /* Switch turns */
+                currentSide = (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
+                console.log("Turn switched. Current side:", currentSide);
+                
+            }
+            /* If it fails */
+            else{
+                let details = lastclicks.pop();
+                ctx.putImageData(details.image, details._x, details._y);
+            }
+        }
+        /* Check if Rook move to an empty tile */
+        /* Check if castling */
+        else if(
+            piece1Name === ChessTypes.Rook && piece1Side === currentSide
+            && piece2Name === ChessTypes.King && piece2Side === currentSide
+        ){
+            if(true){ /* Pretend its true */
+                
+            }
+        }
+        
+    }
+    console.log("lastclicks:", lastclicks);
+    alert("row: " + temp.row + " col: " + temp.col + " is " + targetPiece.ClassName);
 }
 
 function randomEvent(){
