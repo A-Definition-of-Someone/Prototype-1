@@ -16,16 +16,18 @@ export class ChessTile{
     get Callable(){return this.callable;}
     
     set ChessPiece(chesspiece){this.chesspiece = chesspiece;}
-    set Callable(callable){this.callable.push(callable);}
+    set Callable(callable){this.callable = callable;}
 }
 
 /**
  * 
  * @param {string} side Use Side constant from Chess Constants module 
+ * @param {ChessPiece} chesspiece 
  * @returns {Function}
  */
-export function setAttackRange(side){
+export function setAttackRange(side, chesspiece){
     let _side = side;
+    let _chesspiece = chesspiece;
     /**
      * @param {ChessPiece} chesspiece
      */
@@ -33,7 +35,7 @@ export function setAttackRange(side){
         if (chesspiece.Side !== _side && chesspiece.ClassName === "King"){
             return {status: "Block", candidate: chesspiece};
         }
-        return {status: "JustLanding", candidate: chesspiece};
+        return {status: "JustLanding", from: _chesspiece.ID};
     };
 }
 
@@ -45,8 +47,8 @@ export function setNeutralTile(){
     /**
      * @param {ChessPiece} chesspiece
      */
-    return (chesspiece)=>{
-        return {status: "JustLanding", candidate: chesspiece};
+    return ()=>{
+        return {status: "JustLanding", from: "Neutral"};
     };
 }
 
@@ -54,11 +56,13 @@ export function setNeutralTile(){
  * 
  * @param {string} side Use Side constant from Chess Constants module 
  * @param {ChessTile} targetTile containing the pawn that forwarded two tiles
+ * @param {ChessPiece} chesspiece
  * @returns {Function}
  */
-export function setEnPassantMe(side, targetTile){
+export function setEnPassantMe(side, targetTile, chesspiece){
     let _side = side;
     let _targetTile = targetTile;
+    let _chesspiece = chesspiece;
     /**
      * @param {ChessPiece} chesspiece
      */
@@ -69,6 +73,6 @@ export function setEnPassantMe(side, targetTile){
             _targetTile.chesspiece = new ChessPiece(Side.Neutral, temp.Row, temp.Col);
             return {status: "EnPassant", candidate: chesspiece};
         }
-        return {status: "JustLanding", candidate: chesspiece};
+        return {status: "JustLanding", from: _chesspiece.ID};
     };
 }

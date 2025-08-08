@@ -1,5 +1,8 @@
 import { ChessTypes, Side, Status } from "./Chess Constants.js";
 import { ChessTile, setAttackRange, setEnPassantMe } from "./Chess Tiles V2.js";
+import { getP1KingCoord, getP2KingCoord } from "./Chess Data V2.js";
+import { setCheck } from "./Canvas Chess.js";
+
 export class ChessPiece{
     /**
      * @param {string} side Use Side constant from Chess Constants module
@@ -8,6 +11,12 @@ export class ChessPiece{
         this.side = side;
         this.row = row;
         this.col = col;
+        /**
+         * @type {Array<ChessTile>}
+         * @description Tiles that are affected by this piece's attack range
+         */
+        this.currentTilesAffected = [];
+        this.ID = randomID(8); // Generate a random ID for the piece
         console.log(this.ClassName +" row: " + this.Row + " col: " + this.Col);
     }
 
@@ -38,6 +47,14 @@ export class ChessPiece{
 
     }
 
+    RemovePreviousAttackRange(){
+        this.currentTilesAffected.forEach(tile => {
+            tile.Callable = tile.Callable
+            /* Filter out callables from this piece */
+            .filter(callable => callable(this).from !== this.ID);
+        });
+    }
+
     ActuallyMove(chessdata, targetpiece){
         let currentTile = chessdata[this.row][this.col];
         let targetTile = chessdata[targetpiece.Row][targetpiece.Col];
@@ -46,6 +63,13 @@ export class ChessPiece{
         targetTile.ChessPiece = this;
         this.row = targetpiece.Row;
         this.col = targetpiece.Col;
+    }
+    /**
+     * 
+     * @param {ChessTile} affectedtile 
+     */
+    CheckKingOverlapwithAttackRange(affectedtile){
+        
     }
 
     get Side(){return this.side;}
@@ -77,7 +101,7 @@ export class P1_Pawn extends ChessPiece{
     Move(chesspiece, callables, chessdata){
         let enPassant = false;
         callables.forEach(callable => {
-            if(callable(this.Side) === Status.EnPassant){
+            if(callable(this.Side).status === Status.EnPassant){
                 enPassant = true;
             }
         });
@@ -137,15 +161,22 @@ export class P1_Pawn extends ChessPiece{
             && chesspiece.Row - this.Row === 2 && chesspiece.Col === this.Col
         ){
             /* Place the callable for en passant */
-            chessdata[chesspiece.Row - 1][chesspiece.Col].Callable.push(setEnPassantMe(this.Side, chessdata[chesspiece.Row - 1][chesspiece.Col]));
+            chessdata[chesspiece.Row - 1][chesspiece.Col].Callable
+            .push(setEnPassantMe(
+                this.Side, chessdata[chesspiece.Row - 1][chesspiece.Col], this
+            ));
         }
         
         /* After in new dest - Diagonal left and diagonal right */
         if(chesspiece.Row !== 7 && chesspiece.Col !== 0){
-            chessdata[chesspiece.Row + 1][chesspiece.Col - 1].Callable.push(setAttackRange(this.Side));
+            this.currentTilesAffected.push(chessdata[chesspiece.Row + 1][chesspiece.Col - 1]);
+            chessdata[chesspiece.Row + 1][chesspiece.Col - 1].Callable
+            .push(setAttackRange(this.Side, this));
         }
         if(chesspiece.Row !== 7 && chesspiece.Col !== 7){
-            chessdata[chesspiece.Row + 1][chesspiece.Col + 1].Callable.push(setAttackRange(this.Side));
+            this.currentTilesAffected.push(chessdata[chesspiece.Row + 1][chesspiece.Col + 1]);
+            chessdata[chesspiece.Row + 1][chesspiece.Col + 1].Callable
+            .push(setAttackRange(this.Side, this));
         }
         
     }
@@ -155,8 +186,14 @@ export class P1_Pawn extends ChessPiece{
      */
     initAttackRange(chessdata){
         /* Diagonal left and diagonal right */
-        chessdata[this.Row + 1][this.Col - 1].Callable.push(setAttackRange(this.Side));
-        chessdata[this.Row + 1][this.Col + 1].Callable.push(setAttackRange(this.Side));
+        if(this.Row !== 7 && this.Col !== 0){
+            this.currentTilesAffected.push(chessdata[this.Row + 1][this.Col - 1]);
+            chessdata[this.Row + 1][this.Col - 1].Callable.push(setAttackRange(this.Side, this));
+        }
+        if(this.Row !== 7 && this.Col !== 7){
+            this.currentTilesAffected.push(chessdata[this.Row + 1][this.Col + 1]);
+            chessdata[this.Row + 1][this.Col + 1].Callable.push(setAttackRange(this.Side, this));
+        }
     }
 }
 
@@ -178,7 +215,7 @@ export class P2_Pawn extends ChessPiece{
     Move(chesspiece, callables, chessdata){
         let enPassant = false;
         callables.forEach(callable => {
-            if(callable(this.Side) === Status.EnPassant){
+            if(callable(this.Side).status === Status.EnPassant){
                 enPassant = true;
             }
         });
@@ -248,14 +285,21 @@ export class P2_Pawn extends ChessPiece{
             && chesspiece.Row - this.Row === 2 && chesspiece.Col === this.Col
         ){
             /* Place the callable for en passant */
-            chessdata[chesspiece.Row + 1][chesspiece.Col].Callable.push(setEnPassantMe(this.Side, chessdata[chesspiece.Row + 1][chesspiece.Col]));
+            chessdata[chesspiece.Row + 1][chesspiece.Col].Callable
+            .push(setEnPassantMe(
+                this.Side, chessdata[chesspiece.Row + 1][chesspiece.Col], this
+            ));
         }
         /* Diagonal left and diagonal right */
         if(chesspiece.Row !== 0 && chesspiece.Col !== 0){
-            chessdata[chesspiece.Row - 1][chesspiece.Col - 1].Callable.push(setAttackRange(this.Side));
+            this.currentTilesAffected.push(chessdata[chesspiece.Row - 1][chesspiece.Col - 1]);
+            chessdata[chesspiece.Row - 1][chesspiece.Col - 1].Callable
+            .push(setAttackRange(this.Side, this));
         }
         if(chesspiece.Row !== 0 && chesspiece.Col !== 7){
-            chessdata[chesspiece.Row - 1][chesspiece.Col + 1].Callable.push(setAttackRange(this.Side));
+            this.currentTilesAffected.push(chessdata[chesspiece.Row - 1][chesspiece.Col + 1]);
+            chessdata[chesspiece.Row - 1][chesspiece.Col + 1].Callable
+            .push(setAttackRange(this.Side, this));
         }
     }
 
@@ -264,8 +308,16 @@ export class P2_Pawn extends ChessPiece{
      */
     initAttackRange(chessdata){
         /* Diagonal left and diagonal right */
-        chessdata[this.Row - 1][this.Col - 1].Callable.push(setAttackRange(this.Side));
-        chessdata[this.Row - 1][this.Col + 1].Callable.push(setAttackRange(this.Side));
+        if(this.Row !== 0 && this.Col !== 0){
+            this.currentTilesAffected.push(chessdata[this.Row - 1][this.Col - 1]);
+            chessdata[this.Row - 1][this.Col - 1].Callable
+            .push(setAttackRange(this.Side, this));
+        }
+        if(this.Row !== 0 && this.Col !== 7){
+            this.currentTilesAffected.push(chessdata[this.Row - 1][this.Col + 1]);
+            chessdata[this.Row - 1][this.Col + 1].Callable
+            .push(setAttackRange(this.Side, this));
+        }
     }
 }
 
@@ -372,4 +424,12 @@ export class P2_Knight extends ChessPiece{
         
     }
     get ClassName(){return ChessTypes.Knight;}
+}
+
+/**
+ * 
+ * @param {number} length 
+ */
+function randomID(length = 8){
+    return Math.random().toString(36).substring(2, 2 + length);
 }

@@ -8,7 +8,13 @@ let lastclicks = [];
 let targetpieces = [];
 let chessdata;
 let currentSide;
-let checkmate = false;
+let check = false;
+/**
+ * @param {boolean} value 
+ */
+export function setCheck(value){
+    check = value;
+}
 const Rows = 8;
 const Cols = 8;
 const positionTextSize = 40;
@@ -61,6 +67,16 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
 
     let ctx = canvas.getContext("2d", { willReadFrequently: true });
     chessdata = setUpChessBoardData(currentPlayerSide, opposingPlayerSide);
+
+
+    /* Int attack range for all pieces */
+    chessdata.forEach((row)=>{
+        row.forEach(
+            (tile)=>{
+                tile.ChessPiece.initAttackRange(chessdata);
+            });
+        });
+
     let coordP1_King = getP1KingCoord();
     let coordP2_King = getP2KingCoord();
     alert("cooordP1_King: " + coordP1_King.row + " " + coordP1_King.col +
@@ -95,7 +111,7 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
     let X = (temp.col * TileWidth) + boardOffset;
     let Y = (temp.row * TileHeight) + boardOffset;
     
-    if(!checkmate){
+    if(!check){
         NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide);
     }
 });
@@ -270,7 +286,7 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     let enPassant = false;
     let currentCallable = chessdata[currentRow][currentCol].Callable;
     currentCallable.forEach((callable)=>{
-        if(callable(currentside) === Status.Block){
+        if(callable(king).status === Status.Block){
             inDanger = true;
         }
     });
@@ -419,6 +435,7 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     }
     /* Deploy callables (especially Attack Range) */
     chesspiece.AttackRange(chessdata, targetpiece);
+    chesspiece.RemovePreviousAttackRange();
     chesspiece.ActuallyMove(chessdata, targetpiece);
     return true;
    }
