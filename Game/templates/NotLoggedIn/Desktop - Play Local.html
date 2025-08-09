@@ -12,10 +12,9 @@
     <link rel="stylesheet" href="{% static 'Desktop - Play Local.css' %}?v=1.2">
 </head>
 <body>
-    <pre class="GameResult" id="ResultDraw" data-prompt-hidden = "true">Game Result: Draw
-No Winner</pre>
-    <pre class="GameResult" id="ResultForfeit" data-prompt-hidden = "true">Game Result: Forfeit
-<span>Player #2</span></pre>
+    <div class="GameResult" id="ResultDraw" data-prompt-hidden = "true">Game Result: Draw <br>No Winner</div>
+    <div class="GameResult" id="ResultForfeit" data-prompt-hidden = "true">Game Result: Forfeit <br><span>Player #2</span></div>
+    <div class="GameResult" id="EventBanner" data-prompt-hidden = "true">Event: Chess Piece Disappearance <br>Victim Player: Player #2</div>
     <div class="ChessPrompt" id="ProposeDraw" data-prompt-hidden = "true">
         <span>Propose Draw?</span>
         <button>Propose</button>

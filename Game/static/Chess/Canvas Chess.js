@@ -2,7 +2,7 @@ import { setUpChessBoardData, getP1KingCoord, getP2KingCoord } from "./Chess Dat
 import { ChessTypes, Side, Status } from "./Chess Constants.js";
 import { ChessTile } from "./Chess Tiles V2.js";
 import { ChessPiece } from "./Chess Pieces V2.js";
-
+import { Disappear, Betray } from "./PhantomChessEvents.js";
 
 let lastclicks = [];
 let targetpieces = [];
@@ -114,7 +114,7 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
     let Y = (temp.row * TileHeight) + boardOffset;
     
     if(!check.status){
-        NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide);
+        NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata);
     }
 });
 
@@ -703,9 +703,10 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
  * @param {number} X 
  * @param {number} Y 
  * @param {string} currentPlayerSide 
- * @param {string} opposingPlayerSide 
+ * @param {string} opposingPlayerSide
+ * @param {Array<Array<ChessTile>>} chessdata  
  */
-function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide){
+function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata){
     if(lastclicks.length === 0 && targetPiece.Side === currentSide){
         selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
     }
@@ -825,6 +826,9 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
                 
                 drawColouredTiles(piece1Row, piece1Col, ctx, TileWidth, TileHeight);
 
+                /* Random Event */
+                randomEvent(chessdata);
+
                 /* Switch turns */
                 currentSide = (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
                 console.log("Turn switched. Current side:", currentSide);
@@ -868,6 +872,20 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
     */
 }
 
-function randomEvent(){
-    const event = ["disappear", "betrayal"];
+/**
+ * @param {Array<Array<ChessTile>>} chessdata 
+ */
+function randomEvent(chessdata){
+    const event = [Disappear, Betray, ()=>{}];
+    let random = Math.floor(Math.random() * 2);
+
+    if(random === 2){
+        return true;
+    }
+    /* Pause both timers, if any */
+
+    /* Random Event */
+    event[random](chessdata);
+
+    return true;
 }
