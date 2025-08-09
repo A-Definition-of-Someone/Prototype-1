@@ -836,7 +836,17 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
                 ctx.putImageData(details.image, details._x, details._y);
             }
         }
-        /* Check if Rook move to an empty tile */
+        /* 
+        If second piece is ally, reset the targetpieces array and have
+        the second piece as first piece
+         */
+        else if(
+            piece1Side === currentSide && piece2Side === currentSide
+        ){
+            let temp = targetpieces.pop();
+            targetpieces.length = 0;
+            targetpieces.push(temp);
+        }
         /* Check if castling */
         else if(
             piece1Name === ChessTypes.Rook && piece1Side === currentSide

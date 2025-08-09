@@ -2763,6 +2763,174 @@ export class P1_Knight extends ChessPiece{
         
     }
     get ClassName(){return ChessTypes.Knight;}
+
+    /**
+     * 
+     * @param {ChessPiece} chesspiece
+     * @param {Array<Function>} callables  
+     * @param {Array<Array<ChessTile>>} chessdata 
+     * @returns {boolean}
+     */
+    Move(chesspiece, callables, chessdata){
+        /* Top Bottom*/
+        if(
+            Math.abs(this.Row - chesspiece.Row) === 2 
+            && Math.abs(this.Col - chesspiece.Col) === 1
+        ){
+            return true;
+        }
+        /* Left Right */
+        if(
+            Math.abs(this.Col - chesspiece.Col) === 2 
+            && Math.abs(this.Row - chesspiece.Row) === 1
+        ){
+            return true;
+        }
+       
+        return false;
+    }
+
+    /**
+     * 
+     * @param {Array<Array<ChessTile>>} chessdata If it can set enpassantme to tiile behind or infront
+     * @param {ChessPiece} chesspiece to compare with coords to know if it wil move two squares forward
+     */
+    AttackRange(chessdata, chesspiece){
+        /* Top Right */
+        let tempRow = chesspiece.Row - 2;
+        let tempCol = chesspiece.Col + 1;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Top Left */
+        tempRow = chesspiece.Row - 2;
+        tempCol = chesspiece.Col - 1;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Right*/
+        tempRow = chesspiece.Row + 2;
+        tempCol = chesspiece.Col + 1;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Left */
+        tempRow = chesspiece.Row + 2;
+        tempCol = chesspiece.Col - 1;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Top */
+        tempRow = chesspiece.Row - 1;
+        tempCol = chesspiece.Col + 2;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Bottom */
+        tempRow = chesspiece.Row + 1;
+        tempCol = chesspiece.Col + 2;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Top */
+        tempRow = chesspiece.Row - 1;
+        tempCol = chesspiece.Col - 2;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Bottom */
+        tempRow = chesspiece.Row + 1;
+        tempCol = chesspiece.Col - 2;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+    }
+
+    /**
+     * @param {Array<Array<ChessTile>>} chessdata 
+     */
+    initAttackRange(chessdata){
+        /* Top Right */
+        let tempRow = this.Row - 2;
+        let tempCol = this.Col + 1;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Top Left */
+        tempRow = this.Row - 2;
+        tempCol = this.Col - 1;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Right*/
+        tempRow = this.Row + 2;
+        tempCol = this.Col + 1;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Left */
+        tempRow = this.Row + 2;
+        tempCol = this.Col - 1;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Top */
+        tempRow = this.Row - 1;
+        tempCol = this.Col + 2;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Bottom */
+        tempRow = this.Row + 1;
+        tempCol = this.Col + 2;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Top */
+        tempRow = this.Row - 1;
+        tempCol = this.Col - 2;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Bottom */
+        tempRow = this.Row + 1;
+        tempCol = this.Col - 2;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+    }
 }
 
 export class P2_Knight extends ChessPiece{
@@ -2772,6 +2940,174 @@ export class P2_Knight extends ChessPiece{
         
     }
     get ClassName(){return ChessTypes.Knight;}
+
+    /**
+     * 
+     * @param {ChessPiece} chesspiece
+     * @param {Array<Function>} callables  
+     * @param {Array<Array<ChessTile>>} chessdata 
+     * @returns {boolean}
+     */
+    Move(chesspiece, callables, chessdata){
+        /* Top Bottom*/
+        if(
+            Math.abs(this.Row - chesspiece.Row) === 2 
+            && Math.abs(this.Col - chesspiece.Col) === 1
+        ){
+            return true;
+        }
+        /* Left Right */
+        if(
+            Math.abs(this.Col - chesspiece.Col) === 2 
+            && Math.abs(this.Row - chesspiece.Row) === 1
+        ){
+            return true;
+        }
+       
+        return false;
+    }
+
+    /**
+     * 
+     * @param {Array<Array<ChessTile>>} chessdata If it can set enpassantme to tiile behind or infront
+     * @param {ChessPiece} chesspiece to compare with coords to know if it wil move two squares forward
+     */
+    AttackRange(chessdata, chesspiece){
+        /* Top Right */
+        let tempRow = chesspiece.Row - 2;
+        let tempCol = chesspiece.Col + 1;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Top Left */
+        tempRow = chesspiece.Row - 2;
+        tempCol = chesspiece.Col - 1;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Right*/
+        tempRow = chesspiece.Row + 2;
+        tempCol = chesspiece.Col + 1;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Left */
+        tempRow = chesspiece.Row + 2;
+        tempCol = chesspiece.Col - 1;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Top */
+        tempRow = chesspiece.Row - 1;
+        tempCol = chesspiece.Col + 2;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Bottom */
+        tempRow = chesspiece.Row + 1;
+        tempCol = chesspiece.Col + 2;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Top */
+        tempRow = chesspiece.Row - 1;
+        tempCol = chesspiece.Col - 2;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Bottom */
+        tempRow = chesspiece.Row + 1;
+        tempCol = chesspiece.Col - 2;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+    }
+
+    /**
+     * @param {Array<Array<ChessTile>>} chessdata 
+     */
+    initAttackRange(chessdata){
+        /* Top Right */
+        let tempRow = this.Row - 2;
+        let tempCol = this.Col + 1;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Top Left */
+        tempRow = this.Row - 2;
+        tempCol = this.Col - 1;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Right*/
+        tempRow = this.Row + 2;
+        tempCol = this.Col + 1;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Bottom Left */
+        tempRow = this.Row + 2;
+        tempCol = this.Col - 1;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Top */
+        tempRow = this.Row - 1;
+        tempCol = this.Col + 2;
+        if(tempRow >= 0 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Right Bottom */
+        tempRow = this.Row + 1;
+        tempCol = this.Col + 2;
+        if(tempRow <= 7 && tempCol <= 7){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Top */
+        tempRow = this.Row - 1;
+        tempCol = this.Col - 2;
+        if(tempRow >= 0 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+        /* Left Bottom */
+        tempRow = this.Row + 1;
+        tempCol = this.Col - 2;
+        if(tempRow <= 7 && tempCol >= 0){
+            const temp = chessdata[tempRow][tempCol];
+            this.currentTilesAffected.push(temp);
+            temp.Callable.push(setAttackRange(this.Side, this));
+        }
+    }
 }
 
 /**
