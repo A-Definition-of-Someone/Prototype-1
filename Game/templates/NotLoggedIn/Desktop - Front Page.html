@@ -234,8 +234,8 @@ Select Players and then choose a player and click "Challenge" button to challeng
         PromptChallengeSideWhite.addEventListener("click", ()=> PromptChallengeSide.dataset.chosen = "White");
         PromptChallengeSideBlack.addEventListener("click", ()=> PromptChallengeSide.dataset.chosen = "Black");
 
-        PromptChallengePlayer.addEventListener("click", async (ev)=>{
-            ev.preventDefault();
+        PromptChallengePlayer.addEventListener("submit",(ev)=>ev.preventDefault());
+        PromptChallengeOperationChallenge.addEventListener("click", async (ev)=>{
             const url = "PlayLocal";
             let formData = new FormData();
             formData.append("PlayerUsername", "Player #1");

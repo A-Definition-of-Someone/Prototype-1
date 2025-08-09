@@ -657,6 +657,29 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     chesspiece.AttackRange(chessdata, targetpiece);
     chesspiece.ActuallyMove(chessdata, targetpiece);
 
+    /* Check if a king have moved */
+    if(chesspiece.ClassName === ChessTypes.King){
+        if(P1_King.Side === chesspiece.Side){
+            P1_KingCoord.row = chesspiece.Row;
+            P1_KingCoord.col = chesspiece.Col;
+            /*
+            alert(
+                "King Coords: " + "\n Row:" +  P1_KingCoord.row
+                + "\n Col: " + P1_KingCoord.col
+            );
+            */
+        }else{
+            P2_KingCoord.row = chesspiece.Row;
+            P2_KingCoord.col = chesspiece.Col;
+            /*
+            alert(
+                "King Coords: " + "\n Row:" +  P2_KingCoord.row
+                + "\n Col: " + P2_KingCoord.col
+            );
+            */
+        }
+    }
+
     /**
      * Check if the opposing king are checked
      */
