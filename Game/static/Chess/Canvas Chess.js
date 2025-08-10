@@ -36,6 +36,9 @@ let Queen = 3;
 let King = 4;
 let Pawn = 5;
 
+let currentPlayerTimer;
+let opposingPlayerTimer
+
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {HTMLSpanElement} Player1Timer 
@@ -75,11 +78,11 @@ export async function React2Canvas(
     
     currentSide = Side.White;
 
-    let currentPlayerTimer = new Timer(
+    currentPlayerTimer = new Timer(
         timer, PerMove, Player2Timer, opposingPlayerSide, ()=>{
         currentSide = Side.Neutral;
     });
-    let opposingPlayerTimer = new Timer(
+    opposingPlayerTimer = new Timer(
         timer, PerMove, Player1Timer, currentPlayerSide, ()=>{
         currentSide = Side.Neutral;
     });
@@ -146,8 +149,11 @@ export async function React2Canvas(
     let X = (temp.col * TileWidth) + boardOffset;
     let Y = (temp.row * TileHeight) + boardOffset;
     
-    if(!check.status){
-        NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata, currentPlayerTimer, opposingPlayerTimer);
+    if(!check.status || check.status){ //Maybe f I have time, can have address check
+        NormalSelection(
+            lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, 
+            opposingPlayerSide, chessdata, currentPlayerTimer, opposingPlayerTimer
+        );
     }
 });
 
@@ -357,7 +363,7 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     });
     /* If this piece does not have block status, it means the kng is liekly not under attack
     or this piece is too far to cover the king anyway*/
-    if(inDanger){
+    if(inDanger && chesspiece.ClassName !== ChessTypes.King){
         /* 
         If checking direction towards the king from the piece yields no one to protect
         the king, it will stay falase and secondary checking opposite of that direction will
@@ -752,6 +758,28 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     check.status = temp.checkKingOverlapwithAttackRange(chessdata, kingOppo);
     if(check.status){
         console.log("Check! Opposing King is under attack!");
+        /* Check if opponent king have a way to escape */
+        let escape = false;
+        for (let index = 0; index < kingOppo.CurrentTilesAffected.length; index++) {
+            kingOppo.CurrentTilesAffected[index].Callable.forEach(callable=>{
+                if(callable.status !== Status.Block){
+                    escape = true;
+                }
+                else{
+                    escape = false;
+                }
+            });
+            if(escape){
+                break;
+            }
+        }
+        if(!escape){
+            stopAllTimers(currentPlayerTimer, opposingPlayerTimer);
+            let EventBanner = document.getElementById("EventBanner");
+            EventBanner.innerHTML = "Event: Checkmate<br>" + kingOppo.Side + " wins!";
+            EventBanner.dataset.promptHidden = true;
+            currentSide = Side.Neutral;
+        }
     }
     return true;
    }
@@ -924,7 +952,7 @@ function NormalSelection(
                     opposingPlayerTimer.add();
                 }
 
-                let notation = PieceNotation.get(piece1Name) + HorizontalNotation[piece2Row] + piece2Col.toString();
+                let notation = PieceNotation.get(piece1Name) + HorizontalNotation[temp.col] + ( 8 - temp.row);
                 if(currentSide === Side.White){
                     addNewNotationRow(notation);
                 }else if(currentSide == Side.Black){

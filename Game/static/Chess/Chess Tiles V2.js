@@ -48,7 +48,7 @@ export function setNeutralTile(){
      * @param {ChessPiece} chesspiece
      */
     return ()=>{
-        return {status: "JustLanding", from: "Neutral"};
+        return {status: "JustLanding", from: Side.Neutral};
     };
 }
 

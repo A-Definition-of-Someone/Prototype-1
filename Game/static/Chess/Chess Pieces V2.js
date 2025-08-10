@@ -2316,9 +2316,12 @@ export class P1_King extends ChessPiece{
      * @returns {boolean}
      */
     Move(chesspiece, callables, chessdata){
-        for (let index = 0; index < callables.length; index++) {
-            let status = callables[index](this).status;
-            if(status === Status.Block){
+        let Callable = chessdata[chesspiece.Row][chesspiece.Col].Callable;
+        for (let index = 0; index < Callable.length; index++) {
+            let temp = Callable[index](this);
+            if(
+                temp.status === Status.Block && temp.from !== chesspiece.ID
+            ){
                 return false;
             }
         }
@@ -2551,9 +2554,12 @@ export class P2_King extends ChessPiece{
      * @returns {boolean}
      */
     Move(chesspiece, callables, chessdata){
-        for (let index = 0; index < callables.length; index++) {
-            let status = callables[index](this).status;
-            if(status === Status.Block){
+        let Callable = chessdata[chesspiece.Row][chesspiece.Col].Callable;
+        for (let index = 0; index < Callable.length; index++) {
+            let temp = Callable[index](this);
+            if(
+                temp.status === Status.Block && temp.from !== chesspiece.ID
+            ){
                 return false;
             }
         }

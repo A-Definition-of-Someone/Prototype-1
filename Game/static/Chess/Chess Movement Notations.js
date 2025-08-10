@@ -35,7 +35,7 @@ export function addNewNotationRow(chessNotation){
     ChessMovements_Sides.classList.add("ChessMovements_Sides");
 
     const spanNumber = document.createElement("span");
-    spanNumber.innerText = currentRowNum.toString();
+    spanNumber.innerText = "#" + currentRowNum;
 
     const spanWhite = document.createElement("span");
     spanWhite.innerText = chessNotation;

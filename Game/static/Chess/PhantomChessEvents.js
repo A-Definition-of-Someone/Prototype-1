@@ -1,5 +1,5 @@
 import { ChessTile } from "./Chess Tiles V2.js";
-import { ChessTypes, Side } from "./Chess Constants.js";
+import { ChessTypes, Side, Status } from "./Chess Constants.js";
 import { ChessPiece, P1_Pawn, P2_Pawn, P1_Queen, P2_Queen, P1_King, P2_King } from "./Chess Pieces V2.js";
 import { getP1KingCoord, getP2KingCoord } from "./Chess Data V2.js";
 import { setCheck } from "./Canvas Chess.js";
@@ -248,7 +248,7 @@ async function chooseFormerAlliesToAttack(
                     drawColouredTiles(chessdata[tempRow][tempCol].ChessPiece, boardOffset, ctx, TileWidth, TileHeight);
 
                     /* Add to event notation */
-                    let notation = PieceNotation.get(chesspiece.ClassName) + HorizontalNotation[tempNewRow] + tempNewCol.toString();
+                    let notation = PieceNotation.get(chesspiece.ClassName) + HorizontalNotation[temp.Col] + (8 - temp.Row);
                     addEventEntry(notation);
 
                     /* Let's find out if any tiles under attack range have king or not */
@@ -259,6 +259,28 @@ async function chooseFormerAlliesToAttack(
                     let kingOppo = (P1_King.Side === temp.Side) ? P2_King : P1_King;
                     let check = temp.checkKingOverlapwithAttackRange(chessdata, kingOppo);
                     setCheck(check);
+
+                    /* Check if opponent king have a way to escape */
+                    let escape = false;
+                    for (let index = 0; index < kingOppo.CurrentTilesAffected.length; index++) {
+                            kingOppo.CurrentTilesAffected[index].Callable.forEach(callable=>{
+                                if(callable.status !== Status.Block){
+                                    escape = true;
+                                }
+                                else{
+                                    escape = false;
+                                    }
+                                });
+                                if(escape){
+                                    break;
+                                }
+                    }
+                    if(!escape){
+                        stopAllTimers(currentPlayerTimer, opposingPlayerTimer);
+                        let EventBanner = document.getElementById("EventBanner");
+                        EventBanner.innerHTML = "Event: Checkmate<br>" + temp.Side + " wins!";
+                        EventBanner.dataset.promptHidden = true;
+                     }
                    
                     //alert("Check: " + check + "\n" + );
                     
