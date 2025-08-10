@@ -151,6 +151,8 @@ async function turnIntoEnemy(
     let tempRow = temp.Row;
     let tempCol = temp.Col;
 
+    temp.RemovePreviousAttackRange();
+
     /* Check if its a pawn, that's the only type that has different movement based on side */
     let newSide = (chesspiece.Side === Side.White)? Side.Black : Side.White;
     if(chesspiece instanceof P1_Pawn){
@@ -164,7 +166,6 @@ async function turnIntoEnemy(
     }
 
     /* Set Attack Range for choosing who to attack later */
-    temp.RemovePreviousAttackRange();
     temp.initAttackRange(chessdata);
     
     let img  = (temp.Side === Side.White)? 
