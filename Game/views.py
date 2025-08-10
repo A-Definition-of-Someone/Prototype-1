@@ -10,6 +10,14 @@ from Game.forms import PlayLocalForm, SearchOpponentForm, JoinSpecificLobbyForm
 from django.utils.text import slugify
 
 OnlinePlayers = "OnlinePlayers"
+GameConfs = {
+    "Bullet 1 + 0": {"Timer": 1, "PerMove": 0}, 
+    "Blitz 3 + 0": {"Timer": 3, "PerMove": 0}, 
+    "Blitz 3 + 2": {"Timer": 3, "PerMove": 2}, 
+    "Blitz 5 + 0": {"Timer": 5, "PerMove": 0}, 
+    "Rapid 10 + 0": {"Timer": 10, "PerMove": 0}, 
+    "Rapid 20 + 0": {"Timer": 20, "PerMove": 0}
+    }
 
 # Create your views here.
 async def FrontPage(request):
@@ -91,7 +99,7 @@ async def PlayLocal(request):
                     'NotLoggedIn/Desktop - Play Local.html',
                     {
                         "Target": await request.session.aget("PlayerUsername"),
-                        "Config": await request.session.aget("Gamemode"),
+                        "Config": GameConfs[await request.session.aget("Gamemode")],
                         "Side": await request.session.aget("Side"),
                         "csrfmiddlewaretoken": await request.session.aget("csrfmiddlewaretoken"),
                     }
@@ -101,7 +109,7 @@ async def PlayLocal(request):
                 "LoggedIn/Desktop - Play Local.html",
                 {
                     "Target": await request.session.aget("PlayerUsername"),
-                    "Config": await request.session.aget("Gamemode"),
+                    "Config": GameConfs[await request.session.aget("Gamemode")],
                     "Side": await request.session.aget("Side"),
                     "csrfmiddlewaretoken": await request.session.aget("csrfmiddlewaretoken"),
                  })

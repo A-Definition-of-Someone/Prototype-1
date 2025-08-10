@@ -1,8 +1,10 @@
 import { setUpChessBoardData, getP1KingCoord, getP2KingCoord } from "./Chess Data V2.js";
 import { ChessTypes, Side, Status } from "./Chess Constants.js";
 import { ChessTile } from "./Chess Tiles V2.js";
-import { ChessPiece } from "./Chess Pieces V2.js";
+import { ChessPiece, P1_Pawn, P2_Pawn, P1_Queen, P2_Queen } from "./Chess Pieces V2.js";
 import { Disappear, Betray } from "./PhantomChessEvents.js";
+import { Timer } from "./Timer.js";
+import { addBlackEntry, addNewNotationRow, HorizontalNotation, PieceNotation } from "./Chess Movement Notations.js";
 
 let lastclicks = [];
 let targetpieces = [];
@@ -23,6 +25,8 @@ let TileWidth = 0
 let TileHeight = 0;
 const boardOffset = positionTextSize / 2;
 const tileColours = [["#FFB366", "#994C00"], ["#994C00","#FFB366"]];
+const bottomColumnLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
+const leftRowLabels = ["8", "7", "6", "5", "4", "3", "2", "1"];
 let blackSide_IMGs = [];
 let whiteSide_IMGs = [];
 let Rook = 0;
@@ -34,10 +38,16 @@ let Pawn = 5;
 
 /**
  * @param {HTMLCanvasElement} canvas
+ * @param {HTMLSpanElement} Player1Timer 
+ * @param {HTMLSpanElement} Player2Timer 
  * @param {string} currentPlayerSide 
  * @param {string} opposingPlayerSide 
+ * @param {number} timer 
+ * @param {number} PerMove 
  */
-export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide){
+export async function React2Canvas(
+    canvas, Player1Timer, Player2Timer, currentPlayerSide, opposingPlayerSide, timer, PerMove
+){
     console.log("currentPlayerSide: " + currentPlayerSide + " opposingPlayerSide: " + opposingPlayerSide);
     
     blackSide_IMGs = await obtainIMGs(
@@ -63,13 +73,30 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
     console.log("whiteSide_IMGs:", whiteSide_IMGs);
     console.log("blackSide_IMGs:", blackSide_IMGs);
     
-    currentSide = currentPlayerSide;
+    currentSide = Side.White;
+
+    let currentPlayerTimer = new Timer(
+        timer, PerMove, Player2Timer, opposingPlayerSide, ()=>{
+        currentSide = Side.Neutral;
+    });
+    let opposingPlayerTimer = new Timer(
+        timer, PerMove, Player1Timer, currentPlayerSide, ()=>{
+        currentSide = Side.Neutral;
+    });
+
+    let AcceptDraw = document.getElementById("AcceptDraw");
+    let ForfeitMatch = document.getElementById("ForfeitMatch");
+    let ForfeitMatch_Forfeit = ForfeitMatch.querySelector("button:nth-of-type(2)");
+    let AcceptDraw_Accept = AcceptDraw.querySelector("button:nth-of-type(1)");
+
+    ForfeitMatch_Forfeit.addEventListener("click", ()=>stopAllTimers(currentPlayerTimer, opposingPlayerTimer));
+    AcceptDraw_Accept.addEventListener("click", ()=>stopAllTimers(currentPlayerTimer, opposingPlayerTimer));
 
     let ctx = canvas.getContext("2d", { willReadFrequently: true });
     chessdata = setUpChessBoardData(currentPlayerSide, opposingPlayerSide);
 
 
-    /* Int attack range for all pieces */
+    /* Init attack range for all pieces */
     chessdata.forEach((row)=>{
         row.forEach(
             (tile)=>{
@@ -93,6 +120,12 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
 
     Data2Canvas(chessdata);
 
+    if(currentSide === currentPlayerSide){
+        currentPlayerTimer.start();
+    }else{
+        opposingPlayerTimer.start();
+    }
+
     canvas.addEventListener("click", (ev)=>{
     let CanvasRect = canvas.getBoundingClientRect();
     let x = ev.clientX - CanvasRect.left;
@@ -114,7 +147,7 @@ export async function React2Canvas(canvas, currentPlayerSide, opposingPlayerSide
     let Y = (temp.row * TileHeight) + boardOffset;
     
     if(!check.status){
-        NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata);
+        NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata, currentPlayerTimer, opposingPlayerTimer);
     }
 });
 
@@ -213,6 +246,26 @@ function Data2Canvas(chessdata){
             (rowTile * tileHeight) + boardOffset, tileWidth, tileHeight);
         }
     }
+
+    /**
+    * Define Labels on Chessboard and their position
+    */
+    ctx.fillStyle = "#1BA1E2";
+    let labelOffsetWidth = (tileWidth - fontPX) / 2;
+    let labelOffsetHeight = (tileHeight / 2) + 5;
+
+    for (let columnTile = 0; columnTile < Cols; columnTile++) {
+        ctx.fillText(
+            bottomColumnLabels[columnTile], 
+            (columnTile * tileWidth) + boardOffset + labelOffsetWidth + 3, 
+            chessCanvas.height - 2);
+    }
+
+    for (let rowTile = 0; rowTile < Rows; rowTile++) {
+        ctx.fillText(leftRowLabels[rowTile], ((positionTextSize - fontPX) / 2) - 5, 
+        (rowTile * tileHeight) + boardOffset + labelOffsetHeight);
+    }
+
     /**
      * * Render the Chess Pieces
      */
@@ -657,6 +710,7 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
     chesspiece.AttackRange(chessdata, targetpiece);
     chesspiece.ActuallyMove(chessdata, targetpiece);
 
+    let temp = chesspiece;
     /* Check if a king have moved */
     if(chesspiece.ClassName === ChessTypes.King){
         if(P1_King.Side === chesspiece.Side){
@@ -678,12 +732,24 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
             );
             */
         }
+    }else if(chesspiece instanceof P1_Pawn && chesspiece.Row === 7){
+        chesspiece.RemovePreviousAttackRange();
+        temp = chessdata[chesspiece.Row][chesspiece.Col].ChessPiece = 
+        new P1_Queen(chesspiece.Side, chesspiece.Row, chesspiece.Col);
+        temp.initAttackRange(chessdata);
+    }else if(chesspiece instanceof P2_Pawn && chesspiece.Row === 0){
+        chesspiece.RemovePreviousAttackRange();
+        temp = chessdata[chesspiece.Row][chesspiece.Col].ChessPiece = 
+        new P2_Queen(chesspiece.Side, chesspiece.Row, chesspiece.Col);
+        temp.initAttackRange(chessdata);
     }
+
+    
 
     /**
      * Check if the opposing king are checked
      */
-    check.status = chesspiece.checkKingOverlapwithAttackRange(chessdata, kingOppo);
+    check.status = temp.checkKingOverlapwithAttackRange(chessdata, kingOppo);
     if(check.status){
         console.log("Check! Opposing King is under attack!");
     }
@@ -705,8 +771,13 @@ function isMoveAble(chessdata, currentside, chesspiece, targetpiece){
  * @param {string} currentPlayerSide 
  * @param {string} opposingPlayerSide
  * @param {Array<Array<ChessTile>>} chessdata  
+ * @param {Timer} currentPlayerTimer 
+ * @param {Timer} opposingPlayerTimer 
  */
-function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata){
+function NormalSelection(
+    lastclicks, targetPiece, temp, ctx, X, Y, currentPlayerSide, opposingPlayerSide, chessdata,
+    currentPlayerTimer, opposingPlayerTimer
+){
     if(lastclicks.length === 0 && targetPiece.Side === currentSide){
         selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
     }
@@ -727,21 +798,27 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
         selectAlly(X, Y, ctx, TileWidth, TileHeight, lastclicks);
     }
 
-    if(targetpieces.length >= 2){
-        targetpieces.length = 0;
-    }
-    if(targetpieces.length === 1){
-        /* Check if the selected is duplicated or not */
-        if(targetpieces[0].target !== targetPiece){
-            targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
-        }else{
-            //alert("You have selected the same piece twice");
-        }
-    }else{
-        /* Ignore chesspiece */
-        if(targetPiece.ClassName !== ChessTypes.ChessPiece)
+    /* So first click cannot select chess tiles */
+    if(
+        targetpieces.length === 0 && targetPiece.ClassName !== ChessTypes.ChessPiece 
+        && targetPiece.Side == currentSide
+    ){
         targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
     }
+    /* So the second click will either take in tile or opponent chess piece */
+    else if(
+        targetpieces.length === 1 && targetPiece.Side !== currentSide
+    ){
+        targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
+    }
+    /* Assuming the second click is to reselect allying chess piece */
+    else if(
+        targetpieces.length === 1 && targetPiece.Side === currentSide
+    ){
+        targetpieces.length = 0;
+        targetpieces.push({target: targetPiece, _x: temp.row, _y: temp.col});
+    }
+
     /**
      *  After Selecting a piece and what if second piece is selected
      */
@@ -764,6 +841,8 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
         let piece1piece = piece1Info.target;
         let piece2piece = piece2Info.target;
 
+        targetpieces.length = 0;
+
         /* Check if pawn move to empty tile */
         if (
             piece1Name !== ChessTypes.ChessPiece && piece1Side === currentSide
@@ -777,6 +856,7 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
                 targetpieces.length = 0;
                 let details = lastclicks.pop();
                 lastclicks.length = 0;
+                if(details)
                 ctx.putImageData(details.image, details._x, details._y);
                 let downscaling = 1.4;
                 let chesstype = 0;
@@ -805,6 +885,13 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
                     default:
                         break;
                 }
+
+                if(piece1piece instanceof P1_Pawn && piece2piece.Row === 7){
+                    chesstype = Queen;
+                }else if(piece1piece instanceof P2_Pawn && piece2piece.Row === 0){
+                    chesstype = Queen;
+                }
+
                 switch (currentSide) {
                     case Side.White:
                         piece = whiteSide_IMGs[chesstype];
@@ -826,17 +913,54 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
                 
                 drawColouredTiles(piece1Row, piece1Col, ctx, TileWidth, TileHeight);
 
-                /* Random Event */
-                randomEvent(chessdata);
+                /**
+                 * Stop time for the player that moved
+                 */
+                if(currentSide === currentPlayerSide){
+                    currentPlayerTimer.stop();
+                    currentPlayerTimer.add();
+                }else{
+                    opposingPlayerTimer.stop();
+                    opposingPlayerTimer.add();
+                }
 
-                /* Switch turns */
-                currentSide = (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
-                console.log("Turn switched. Current side:", currentSide);
+                let notation = PieceNotation.get(piece1Name) + HorizontalNotation[piece2Row] + piece2Col.toString();
+                if(currentSide === Side.White){
+                    addNewNotationRow(notation);
+                }else if(currentSide == Side.Black){
+                    addBlackEntry(notation);
+                }
+
                 
+                let tempSide = currentSide;
+                currentSide = Side.Neutral;
+                
+                /* Random Event */
+                randomEvent(
+                    chessdata, tempSide, currentPlayerSide, opposingPlayerSide,
+                    ctx, boardOffset, TileHeight, TileWidth, downscaling,
+                    blackSide_IMGs, whiteSide_IMGs
+                ).then((NextSide)=>{
+                    // Switch turns
+                    currentSide = NextSide;
+                    console.log("Turn switched. Current side:", currentSide);
+                    /**
+                     * Start time for the next player
+                     * */
+                    if(currentSide === currentPlayerSide){
+                        currentPlayerTimer.start();
+                    }else{
+                        opposingPlayerTimer.start();
+                    }
+                });
+                
+                //currentSide = (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
+
             }
             /* If it fails */
             else{
                 let details = lastclicks.pop();
+                if(details)
                 ctx.putImageData(details.image, details._x, details._y);
             }
         }
@@ -860,6 +984,8 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
                 
             }
         }
+
+        
         
     }
     console.log("lastclicks:", lastclicks);
@@ -874,18 +1000,46 @@ function NormalSelection(lastclicks, targetPiece, temp, ctx, X, Y, currentPlayer
 
 /**
  * @param {Array<Array<ChessTile>>} chessdata 
+ * @param {string} currentSide 
+ * @param {string} currentPlayerSide
+ * @param {string} opposingPlayerSide
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {number} boardOffset 
+ * @param {number} TileHeight 
+ * @param {number} TileWidth 
+ * @param {number} scaleDown  
+ * @param {ImageData} blackSide_IMGs 
+ * @param {ImageData} whiteSide_IMGs 
  */
-function randomEvent(chessdata){
-    const event = [Disappear, Betray, ()=>{}];
+async function randomEvent(chessdata, currentSide, currentPlayerSide, opposingPlayerSide,
+    ctx, boardOffset, TileHeight, TileWidth,  scaleDown, blackSide_IMGs, whiteSide_IMGs
+){
+    /**
+     * @type {Array<Function>}
+     */
+    const event = [Disappear, Betray, async ()=>{}];
     let random = Math.floor(Math.random() * 2);
 
     if(random === 2){
-        return true;
+        return (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
     }
     /* Pause both timers, if any */
 
     /* Random Event */
-    event[random](chessdata);
+    await event[random](
+        chessdata, ctx, boardOffset, TileHeight, TileWidth, scaleDown,
+        blackSide_IMGs, whiteSide_IMGs
+    );
 
-    return true;
+    return (currentSide === currentPlayerSide) ? opposingPlayerSide : currentPlayerSide;
+}
+
+/**
+ * 
+ * @param {Timer} playerTimer1 
+ * @param {Timer} playerTimer2 
+ */
+function stopAllTimers(playerTimer1, playerTimer2){
+    playerTimer1.stop();
+    playerTimer2.stop();
 }

@@ -215,7 +215,8 @@ body{
 }
 
 #ChessMovements_Sides_Header span:nth-child(2),
-#ChessMovements_Sides_Header span:nth-child(3){
+#ChessMovements_Sides_Header span:nth-child(3),
+#ChessMovements_Sides_Header span:nth-child(4){
     display: grid;
     height: 100%;
     width: 100%;
@@ -262,7 +263,8 @@ body{
 }
 
 .ChessMovements_Sides span:nth-child(2),
-.ChessMovements_Sides span:nth-child(3){
+.ChessMovements_Sides span:nth-child(3),
+.ChessMovements_Sides span:nth-child(4){
     display: grid;
     height: 100%;
     width: 100%;

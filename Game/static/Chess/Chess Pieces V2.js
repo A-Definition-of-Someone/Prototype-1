@@ -54,9 +54,17 @@ export class ChessPiece{
         });
     }
 
+    /**
+     * 
+     * @param {Array<Array<ChessTile>>} chessdata 
+     * @param {ChessPiece} targetpiece 
+     */
     ActuallyMove(chessdata, targetpiece){
         let currentTile = chessdata[this.row][this.col];
         let targetTile = chessdata[targetpiece.Row][targetpiece.Col];
+
+        /* Clear the defeated chess piece's attack range */
+        targetpiece.RemovePreviousAttackRange();
 
         currentTile.ChessPiece = new ChessPiece(Side.Neutral, this.row, this.col);
         targetTile.ChessPiece = this;
@@ -102,6 +110,8 @@ export class ChessPiece{
     set Col(col){this.col = col;}
 
     get ClassName(){return ChessTypes.ChessPiece;}
+
+    get CurrentTilesAffected(){return this.currentTilesAffected;}
 }
 
 export class P1_Pawn extends ChessPiece{
@@ -1860,6 +1870,8 @@ export class P1_Queen extends ChessPiece{
                 }
             }
         }
+
+        return true;
     }
 
     /**
@@ -2255,6 +2267,8 @@ export class P2_Queen extends ChessPiece{
                 }
             }
         }
+
+        return true;
     }
 
     /**

@@ -75,7 +75,7 @@
         {% include "Desktop - Menu.html" %}
         <!--
         <span>{{Target}}</span>
-        <span>{{Config}}</span>
+        <span>{{Config.Timer}} {{Config.PerMove}}</span>
         <span>{{Side}}</span>
         <input type="hidden" value="{{csrfmiddlewaretoken}}" name="csrfmiddlewaretoken">
     -->
@@ -89,7 +89,7 @@
         <div id="Match">
             <div class ="PlayerContainer">
                 <span class="PlayerName">{% if Side == 'White' %} Black {% else %} White {% endif %}</span>
-                <span class="PlayerTime">10:00</span>
+                <span class="PlayerTime" id="Player1Timer"></span>
             </div>
             <div id="ChessMovements">
                 <span id="ChessMovements_Header">Chess Movements</span>
@@ -97,8 +97,9 @@
                     <span></span>
                     <span>White</span>
                     <span>Black</span>
-                    <div></div>
+                    <span></span>
                 </div>
+                <!--
                 <div class="ChessMovements_Sides">
                     <span>#1</span>
                     <span>Pd4</span>
@@ -109,12 +110,13 @@
                     <span>#2</span>
                     <span>Nc3</span>
                     <span>Nf6</span>
-                    <div></div>
+                    <span></span>
                 </div>
+            -->
             </div>
             <div class ="PlayerContainer">
                 <span class="PlayerName">{{Side}}</span>
-                <span class="PlayerTime">10:00</span>
+                <span class="PlayerTime" id="Player2Timer"></span>
             </div>
         </div>
     </div>
@@ -312,8 +314,17 @@
             Forfeit.disabled = true;
         });
 
-        /*Canvas*/
-        React2Canvas(document.getElementById("ChessboardLayout"), "{{Side}}", "{% if Side == 'White' %}Black{% else %}White{% endif %}");
+        document.addEventListener("DOMContentLoaded", ()=>{
+            /*Canvas*/
+            React2Canvas(
+            document.getElementById("ChessboardLayout"),
+            document.getElementById("Player1Timer"),
+            document.getElementById("Player2Timer"), 
+            "{{Side}}", "{% if Side == 'White' %}Black{% else %}White{% endif %}",
+            parseInt("{{Config.Timer}}"), parseInt("{{Config.PerMove}}")
+        );
+        });
+        
         
 
 
