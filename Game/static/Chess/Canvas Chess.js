@@ -81,12 +81,18 @@ export async function React2Canvas(
     currentPlayerTimer = new Timer(
         timer, PerMove, Player2Timer, opposingPlayerSide, ()=>{
         currentSide = Side.Neutral;
+        OfferDraw.disabled = true;
+        Forfeit.disabled = true;
     });
     opposingPlayerTimer = new Timer(
         timer, PerMove, Player1Timer, currentPlayerSide, ()=>{
         currentSide = Side.Neutral;
+        OfferDraw.disabled = true;
+        Forfeit.disabled = true;
     });
 
+    let OfferDraw = document.querySelector("#Options button:nth-child(1)");
+    let Forfeit = document.querySelector("#Options button:nth-child(2)");
     let AcceptDraw = document.getElementById("AcceptDraw");
     let ForfeitMatch = document.getElementById("ForfeitMatch");
     let ForfeitMatch_Forfeit = ForfeitMatch.querySelector("button:nth-of-type(2)");

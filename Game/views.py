@@ -129,7 +129,7 @@ async def PlayMultiplayer(request):
                     "Player1Side": PlayerConfig["Side"],
                     "Player2": PlayerConfig["OpponentUsername"],
                     "Player2Side": "Black" if PlayerConfig["Side"] == "White" else "White",
-                    "Config": PlayerConfig["Gamemode"]
+                    "Config": GameConfs[await request.session.aget("Gamemode")]
                 }
                 )
         return HttpResponse("Error, you're not in a match!")
@@ -144,7 +144,7 @@ async def searchOpponent(request):
         if form.is_valid():
             Side = form.cleaned_data["Side"]
             Gamemode = slugify(form.cleaned_data["Gamemode"])
-            await request.session.aset("Gamemode", Gamemode)
+            await request.session.aset("Gamemode", form.cleaned_data["Gamemode"])
             LobbyList = list(json.loads(await redis_client.get(Gamemode) or "[]"))
             for opponent in LobbyList:
                 if opponent[1] != Side: #The opponent side is opposite ours

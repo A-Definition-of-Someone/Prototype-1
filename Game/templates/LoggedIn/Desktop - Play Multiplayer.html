@@ -4,16 +4,332 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play Local</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'CommonVariables.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'Desktop - Prompt - Challenge.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'NotLoggedIn/Desktop - Prompt - Auth.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'Desktop - Menu.css' %}">
+    <link rel="stylesheet" href="{% static 'Desktop - Play Local.css' %}?v=1.2">
 </head>
 <body>
-    
-    <span>{{Player1}}</span>
+    <div class="GameResult" id="ResultDraw" data-prompt-hidden = "true">Game Result: Draw <br>No Winner</div>
+    <div class="GameResult" id="ResultForfeit" data-prompt-hidden = "true">Game Result: Forfeit <br><span>Player #2</span></div>
+    <div class="GameResult" id="EventBanner" data-prompt-hidden = "true">Event: Chess Piece Disappearance <br>Victim Player: Player #2</div>
+    <div class="ChessPrompt" id="ProposeDraw" data-prompt-hidden = "true">
+        <span>Propose Draw?</span>
+        <button>Propose</button>
+        <button>Cancel</button>
+    </div>
+    <div class="ChessPrompt" id="AcceptDraw" data-prompt-hidden = "true">
+        <span>Accept Draw?</span>
+        <button>Accept</button>
+        <button>Decline</button>
+    </div>
+    <div class="ChessPrompt" id="ForfeitMatch" data-prompt-hidden = "true">
+        <span>Forfeit Match?</span>
+        <button>Stay</button>
+        <button>Forfeit</button>
+    </div>
+    <form id="Prompt-Challenge-Player" data-prompt-hidden = "true" data-target = "0">
+        <span id="Prompt-Challenge-Header">Challenge Player #1 to a game of:</span>
+        <div id="Prompt-Challenge-Gap1"></div>
+        <div id="Prompt-Challenge-Option-Container">
+            <div class="Prompt-Challenge-Option" data-chosen="true">Bullet 1 + 0</div>
+            <div class="Prompt-Challenge-Option">Blitz 3 + 0</div>
+            <div class="Prompt-Challenge-Option">Blitz 3 + 2</div>
+            <div class="Prompt-Challenge-Option">Blitz 5 + 0</div>
+            <div class="Prompt-Challenge-Option">Rapid 10 + 0</div>
+            <div class="Prompt-Challenge-Option">Rapid 20 + 0</div>
+        </div>
+        <div id="Prompt-Challenge-Gap2"></div>
+        <span id="Prompt-Challenge-SubHeader">Choose which chess side to be:</span>
+        <div id="Prompt-Challenge-Side" data-chosen="White">
+            <img src="{% static 'Resources/White Knight.png' %}" alt="" id="Prompt-Challenge-Side-White">
+            <span id="Prompt-Challenge-Side-VS">VS</span>
+            <img src="{% static 'Resources/Black Knight.png' %}" alt="" id="Prompt-Challenge-Side-Black">
+        </div>
+        <div id="Prompt-Challenge-Error" data-error="0" >Connection Error: Unable to reach server</div>
+        <div id="Prompt-Challenge-Operation">
+            <span id="Prompt-Challenge-Operation-Cancel">Cancel</span>
+            <input type="submit" value="Challenge" id="Prompt-Challenge-Operation-Challenge">
+        </div>
+    </form>
+    <input type="hidden" value="{{csrfmiddlewaretoken}}" name="csrfmiddlewaretoken">
+    <div id="MainLayout">
+        {% include "Desktop - Menu.html" %}
+        <!--
+        <span>{{Target}}</span>
+        <span>{{Config.Timer}} {{Config.PerMove}}</span>
+        <span>{{Side}}</span>
+        <input type="hidden" value="{{csrfmiddlewaretoken}}" name="csrfmiddlewaretoken">
+    -->
+        <canvas id="ChessboardLayout">
+            
+        </canvas>
+        <div id="Options">
+            <button>Offer Draw</button>
+            <button>Forfeit</button>
+        </div>
+        <div id="Match">
+            <div class ="PlayerContainer">
+                <span class="PlayerName">{{Player2}}</span>
+                <span class="PlayerTime" id="Player1Timer"></span>
+            </div>
+            <div id="ChessMovements">
+                <span id="ChessMovements_Header">Chess Movements</span>
+                <div id="ChessMovements_Sides_Header">
+                    <span></span>
+                    <span>White</span>
+                    <span>Black</span>
+                    <span></span>
+                </div>
+                <!--
+                <div class="ChessMovements_Sides">
+                    <span>#1</span>
+                    <span>Pd4</span>
+                    <span>Pd5</span>
+                    <div></div>
+                </div>
+                <div class="ChessMovements_Sides">
+                    <span>#2</span>
+                    <span>Nc3</span>
+                    <span>Nf6</span>
+                    <span></span>
+                </div>
+            -->
+            </div>
+            <div class ="PlayerContainer">
+                <span class="PlayerName">{{Player1}}</span>
+                <span class="PlayerTime" id="Player2Timer"></span>
+            </div>
+        </div>
+    </div>
+</body>
+<!--Temporary, just to have a chessboard render. Later need to replace with the one where you can move the chess-->
+<!--<script src="{% static 'Render Chessboard.js' %}?v=1.0"></script>-->
+<script type="module">
+    import {React2Canvas} from "{% static 'Chess/Canvas Chess.js' %}?v=1.2";
+
+    /*Players' Details*/
+    let Player1Name = "{{Player1}}";
+    let Player2Name = "{{Player2}}";
+
+    /*csrf*/
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    /*Web Socket*/
+    let OpponentPlayerWebSocket = null;
+    let OpenLobbyWebsocket = null;
+
+    /*Prompt Challenge*/
+    let PromptChallengePlayer = document.getElementById("Prompt-Challenge-Player");
+    let PromptChallengeHeader = document.getElementById("Prompt-Challenge-Header");
+    let PromptChallengeOperationCancel = document.getElementById("Prompt-Challenge-Operation-Cancel");
+    let PromptChallengeOperationChallenge = document.getElementById("Prompt-Challenge-Operation-Challenge");
+    let PromptChallengeSide = document.getElementById("Prompt-Challenge-Side");
+    let PromptChallengeSideWhite = document.getElementById("Prompt-Challenge-Side-White");
+    let PromptChallengeSideBlack = document.getElementById("Prompt-Challenge-Side-Black");
+    let PromptChallengeError = document.getElementById("Prompt-Challenge-Error");
+    let PromptChallengeAction = [challengeLocally, challengeGlobally];
+    let PromptChallengeOptionContainer = document.getElementById("Prompt-Challenge-Option-Container");
+
+    PromptChallengeOptionContainer.addEventListener("click", (ev)=>{
+        if(ev.target.classList[0] === "Prompt-Challenge-Option"){
+            let PromptChallengeChosen = document.querySelector(".Prompt-Challenge-Option[data-chosen=\"true\"]");
+            PromptChallengeChosen.dataset.chosen = "false";
+            ev.target.dataset.chosen = "true";
+        }
+        });
+
+    PromptChallengeSideWhite.addEventListener("click", ()=> PromptChallengeSide.dataset.chosen = "White");
+    PromptChallengeSideBlack.addEventListener("click", ()=> PromptChallengeSide.dataset.chosen = "Black");
+
+    PromptChallengePlayer.addEventListener("submit", async (ev)=>{
+        ev.preventDefault();
+        let PromptChallengeChosen = document.querySelector(".Prompt-Challenge-Option[data-chosen=\"true\"]");
+        await PromptChallengeAction[PromptChallengePlayer.dataset.target](PromptChallengePlayer.Username, PromptChallengeChosen.innerText);
+    });
+
+    PromptChallengeOperationCancel.addEventListener("click",()=>{
+    PromptChallengePlayer.dataset.promptHidden = "true";
+    PromptChallengeError.dataset.error = "0";
+    if (OpponentPlayerWebSocket instanceof WebSocket){
+        //Inform the challenged player, the challenge's off
+        OpponentPlayerWebSocket.send("Cancel");
+    }
+    if (OpenLobbyWebsocket instanceof WebSocket){
+        OpenLobbyWebsocket.close(4001);
+    }
+    });
+
+        /*Menu*/
+        let MenuCollapseBTN = document.getElementById("Menu-CollapseBTN");
+        let Menu = document.getElementById("Menu");
+        let MenuOption1 = Menu.querySelector(".Menu-Option:nth-child(3)");
+        let MenuOption2 = Menu.querySelector(".Menu-Option:nth-child(4)");
+        let switchCollapse = [1,0];
+
+        MenuCollapseBTN.addEventListener("click",()=>{
+            Menu.dataset.collapse = switchCollapse[Menu.dataset.collapse];
+        });
+
+        MenuOption1.addEventListener("click", ()=>{
+            PromptChallengePlayer.dataset.promptHidden = "false";
+            PromptChallengeHeader.innerText = "Please Choose Phantom Chess modes:";
+            PromptChallengeOperationChallenge.value = "Play (Local)";
+            PromptChallengePlayer.dataset.target = 0;
+            PromptChallengeError.dataset.error = "0";
+        });
+
+        MenuOption2.addEventListener("click", ()=>{
+            PromptChallengePlayer.dataset.promptHidden = "false";
+            PromptChallengeHeader.innerText = "Please Choose Phantom Chess modes:";
+            PromptChallengeOperationChallenge.value = "Play";
+            PromptChallengePlayer.dataset.target = 1;
+            PromptChallengeError.dataset.error = "0";
+        });
+        
+
+        /*Draw*/
+        let OfferDraw = document.querySelector("#Options button:nth-child(1)");
+        let ProposeDraw = document.getElementById("ProposeDraw");
+        let ProposeDraw_Propose = ProposeDraw.querySelector("button:nth-of-type(1)");
+        let ProposeDraw_Cancel = ProposeDraw.querySelector("button:nth-of-type(2)");
+        let AcceptDraw = document.getElementById("AcceptDraw");
+        let AcceptDraw_Accept = AcceptDraw.querySelector("button:nth-of-type(1)");
+        let AcceptDraw_Decline = AcceptDraw.querySelector("button:nth-of-type(2)");
+        let ResultDraw = document.getElementById("ResultDraw");
+
+        OfferDraw.addEventListener("click", ()=>ProposeDraw.dataset.promptHidden = "false");
+        ProposeDraw_Propose.addEventListener("click", ()=>{
+            ProposeDraw.dataset.promptHidden = "true";
+            AcceptDraw.dataset.promptHidden = "false";
+        });
+        ProposeDraw_Cancel.addEventListener("click", ()=>ProposeDraw.dataset.promptHidden = "true");
+        AcceptDraw_Accept.addEventListener("click", ()=>{
+            AcceptDraw.dataset.promptHidden = "true";
+            ResultDraw.dataset.promptHidden = "false";
+            OfferDraw.disabled = true;
+            Forfeit.disabled = true;
+        });
+        AcceptDraw_Decline.addEventListener("click", ()=>AcceptDraw.dataset.promptHidden = "true");
+
+        /*Forfeit*/
+        let Forfeit = document.querySelector("#Options button:nth-child(2)");
+        let ForfeitMatch = document.getElementById("ForfeitMatch");
+        let ForfeitMatch_Stay = ForfeitMatch.querySelector("button:nth-of-type(1)");
+        let ForfeitMatch_Forfeit = ForfeitMatch.querySelector("button:nth-of-type(2)");
+        let ResultForfeit = document.getElementById("ResultForfeit");
+        let ResultForfeitWinner = ResultForfeit.querySelector("span");
+        
+        Forfeit.addEventListener("click", ()=>ForfeitMatch.dataset.promptHidden = "false");
+        ForfeitMatch_Stay.addEventListener("click", ()=>ForfeitMatch.dataset.promptHidden = "true");
+        ForfeitMatch_Forfeit.addEventListener("click", ()=>{
+            ForfeitMatch.dataset.promptHidden = "true";
+            ResultForfeitWinner.innerText = Player2Name + "Wins!";
+            ResultForfeit.dataset.promptHidden = "false";
+            OfferDraw.disabled = true;
+            Forfeit.disabled = true;
+        });
+
+        document.addEventListener("DOMContentLoaded", ()=>{
+            /*Canvas*/
+            React2Canvas(
+            document.getElementById("ChessboardLayout"),
+            document.getElementById("Player1Timer"),
+            document.getElementById("Player2Timer"), 
+            "{{Player1Side}}", "{{Player2Side}}",
+            parseInt("{{Config.Timer}}"), parseInt("{{Config.PerMove}}")
+        );
+        });
+        
+    /*Functions*/
+    async function challengeLocally(){
+            const url = "PlayLocal";
+            let formData = new FormData();
+            formData.append("PlayerUsername", "Player #1");
+            formData.append("Gamemode", document.querySelector(".Prompt-Challenge-Option[data-chosen=\"true\"]").innerText);
+            formData.append("Side", PromptChallengeSide.dataset.chosen);
+            formData.append("csrfmiddlewaretoken", csrftoken);
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    mode: 'same-origin' // Do not send CSRF token to another domain.
+                });
+
+                const textObject = await response.text();
+                if(textObject !== "OK"){
+                    PromptChallengeError.innerText = textObject;
+                    PromptChallengeError.dataset.error = "1";
+                }else{
+                    window.location.replace("PlayLocal");
+                }
+
+            } catch (error) {
+                PromptChallengeError.innerText = "Unable to send response!";
+                PromptChallengeError.dataset.error = "1";
+            }
+        }
+
+        async function challengeGlobally(){
+            const url = "searchOpponent";
+            let formData = new FormData();
+            formData.append("Gamemode", document.querySelector(".Prompt-Challenge-Option[data-chosen=\"true\"]").innerText);
+            formData.append("Side", PromptChallengeSide.dataset.chosen);
+            formData.append("csrfmiddlewaretoken", csrftoken);
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    mode: 'same-origin' // Do not send CSRF token to another domain.
+                });
+
+                const textObject = await response.text();
+                if(textObject === "Match Found!"){
+                    PromptChallengeError.innerText = textObject;
+                    PromptChallengeError.dataset.error = "2";
+                    window.location.replace("PlayMultiplayer");
+                } else if(textObject === "Open Lobby"){
+                    PromptChallengeError.innerText = textObject;
+                    PromptChallengeError.dataset.error = "2";
+                    //Open Lobby Web Socket first
+                    OpenLobbyWebsocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
+                        "ws://" +
+                        window.location.host +
+                        "/ws/Matchmaking/" + 
+                        "{{Username}}" + //This belongs to django template
+                        "/");
+                    OpenLobbyWebsocket.addEventListener("message",(ev)=>{
+                            const data = JSON.parse(ev.data);
+                            PromptChallengeError.innerText = data["event"] + ": " + data["sender"];
+                            PromptChallengeError.dataset.error = "2";
+                            window.location.replace("PlayMultiplayer");
+                        });
+                    //Open lobby
+                    openLobby();
+                }
+                else{
+                    PromptChallengeError.innerText = textObject;
+                    PromptChallengeError.dataset.error = "1";
+                }
+            } catch (error) {
+                PromptChallengeError.innerText = "Unable to send response!" + " " + error;
+                PromptChallengeError.dataset.error = "1";
+            }
+        }
+
+
+
+</script>
+</html>
+<!--
+<span>{{Player1}}</span>
     <span>{{Config}}</span>
     <span>{{Player1Side}}</span>
     <br>
     <span>{{Player2}}</span>
     <span>{{Config}}</span>
     <span>{{Player2Side}}</span>
-    <input type="hidden" value="{{csrfmiddlewaretoken}}" name="csrfmiddlewaretoken">
-</body>
-</html>
+-->
