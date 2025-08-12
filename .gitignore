@@ -1,1 +1,5 @@
 .venv/
+Phantom_Chess/__pycache__/
+Game/__pycache__/
+Game/management/commands/__pycache__/
+Game/migrations/__pycache__/
