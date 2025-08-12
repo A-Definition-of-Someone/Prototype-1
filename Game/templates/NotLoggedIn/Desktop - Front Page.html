@@ -45,9 +45,9 @@
         <span id="Prompt-Auth-Error1">Auth Error: Username doesn't exist!</span>
         <div id="Prompt-Auth-Gap1"></div>
         <div class="Prompt-Auth-Input"><span>Username</span><input type="text" name="PlayerUsername" id="PlayerUsername" placeholder="Enter Username Here" required></div>
-        <div class="Prompt-Auth-Input"><span>Password</span><input type="password" name="PlayerPassword" id="PlayerPassword" placeholder="Enter Password Here" required autocomplete="on"></div>
+        <div class="Prompt-Auth-Input"><span>Password</span><input type="password" name="PlayerPassword" id="PlayerPassword" placeholder="Enter Password Here" required ></div>
         <span id="Prompt-Auth-Error2">Auth Error: Password is not the same!</span>
-        <div id="ReenterPassword" class="Prompt-Auth-Input"><span>Reenter Password</span><input type="password" name="PlayerPasswordAgain" id="PlayerPasswordAgain" placeholder="Enter Password Again Here" disabled required autocomplete="on"></div>
+        <div id="ReenterPassword" class="Prompt-Auth-Input"><span>Reenter Password</span><input type="password" name="PlayerPasswordAgain" id="PlayerPasswordAgain" placeholder="Enter Password Again Here" disabled required ></div>
         <div id="Prompt-Auth-Gap2">{% csrf_token %}</div>
         <div id="Prompt-Auth-Operation">
             <div id="Operation-Cancel">Cancel</div>
@@ -139,6 +139,7 @@ Select Players and then choose a player and click "Challenge" button to challeng
         PromptAuth.addEventListener("submit", async (ev) => {
             ev.preventDefault();
             if(OperationLogin.value !== "Login" && PlayerPassword.value !== PlayerPasswordAgain.value){
+                console.log("TEST");
                 PromptAuthError1.innerText = "Auth Error: Password is not the same!";
                 PromptAuth.dataset.authStatus = "ERROR2";
                 console.log("Password1: " + PlayerPassword.value);

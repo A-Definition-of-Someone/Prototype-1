@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ["phantom-chess-hbgrf4aba2b4d8g6.malaysiawest-01.azurewebsites.n
 # Application definition
 
 INSTALLED_APPS = [
+    "whitenoise.runserver_nostatic",  # Optional: disables Django's dev static handler
     'daphne',
     'Game',
     'django.contrib.admin',
