@@ -1,1 +1,2 @@
-daphne -b 0.0.0.0 -p 8000 Phantom_Chess.asgi:application
+gunicorn Phantom_Chess.asgi:application --bind=0.0.0.0:8000 -w 2 -k uvicorn.workers.UvicornWorker
+
