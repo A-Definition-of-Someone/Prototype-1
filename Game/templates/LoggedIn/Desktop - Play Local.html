@@ -296,7 +296,7 @@
                     PromptChallengeError.dataset.error = "2";
                     //Open Lobby Web Socket first
                     OpenLobbyWebsocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-                        "ws://" +
+                        "wss://" +
                         window.location.host +
                         "/ws/Matchmaking/" + 
                         "{{Username}}" + //This belongs to django template
