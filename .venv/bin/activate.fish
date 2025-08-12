@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV '/home/ayman/Desktop/Unitar Sem 8/ITWB2924 - Major Project/Prototype 1/.venv'
+set -gx VIRTUAL_ENV '/home/ayman/Desktop/Unitar Sem 8/ITWB2924 - Major Project/Azure/Prototype 1/.venv'
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
