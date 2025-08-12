@@ -3,7 +3,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from Game.models import Account
-from Game.redis_client import redis_client
+from Game.redis_client import Get_redis_client
 from Game.forms import CreateChallengeForm
 
 class OnlinePlayersConsumer(AsyncWebsocketConsumer):
@@ -21,6 +21,7 @@ class OnlinePlayersConsumer(AsyncWebsocketConsumer):
         username_isExist = await database_sync_to_async(PlayerSession.has_key)("Username")
 
         if username_isExist:
+            redis_client = Get_redis_client()
             OnlinePlayersListEncoded = await redis_client.get(self.OnlinePlayers) 
             OnlinePlayersList = list(json.loads(OnlinePlayersListEncoded) if OnlinePlayersListEncoded else [])
             #Only players other than disconnected user is included in OnlinePlayersList
@@ -60,6 +61,7 @@ class PlayerChallengeConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         PlayerSession = self.scope["session"]
+        redis_client = Get_redis_client()
         username_isExist = await database_sync_to_async(PlayerSession.has_key)("Username")
         if username_isExist:
             Username = await database_sync_to_async(PlayerSession.get)("Username")
@@ -143,6 +145,7 @@ class PlayerMatchConsumer(AsyncWebsocketConsumer):
 
         if username_isExist and gamemode_isExist:
             print("Disconnect Lobby")
+            redis_client = Get_redis_client()
             Username = await database_sync_to_async(PlayerSession.get)("Username")
             Gamemode = await database_sync_to_async(PlayerSession.get)("Gamemode")
             LobbyList = list(json.loads(await redis_client.get(Gamemode) or "[]"))

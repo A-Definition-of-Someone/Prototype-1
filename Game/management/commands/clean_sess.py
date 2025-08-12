@@ -1,7 +1,7 @@
 import os
 from django.core.management.base import BaseCommand
 from django.contrib.sessions.models import Session
-from Game.redis_client import redis_client
+from Game.redis_client import Get_redis_client
 from asgiref.sync import async_to_sync
 
 class Command(BaseCommand):
@@ -14,6 +14,8 @@ class Command(BaseCommand):
         self.stdout.write(f"All sessions cleared, Done!")
         
 async def delete_key_OnlinePlayers():
+    redis_client = Get_redis_client()
     return await redis_client.delete("OnlinePlayers")
 async def delete_all_keys():
+    redis_client = Get_redis_client()
     return await redis_client.flushdb()

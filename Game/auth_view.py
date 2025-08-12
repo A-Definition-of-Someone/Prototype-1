@@ -3,7 +3,6 @@ from django.http import JsonResponse
 from channels.layers import get_channel_layer
 from django.contrib.auth.hashers import make_password
 from Game.data_format import PlayerStatusFormat
-from Game.redis_client import redis_client
 from Game.forms import PlayerAuthForm
 from Game.models import Account, History
 import json

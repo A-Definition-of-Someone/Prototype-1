@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from Game.data_format import PlayerStatusFormat
-from Game.redis_client import redis_client
+from Game.redis_client import Get_redis_client
 from Game.models import Account, History
 import json
 from Game.forms import PlayLocalForm, SearchOpponentForm, JoinSpecificLobbyForm
@@ -46,6 +46,7 @@ async def FrontPage(request):
 
 async def get_player_list(request):
     username_isExist = await request.session.ahas_key("Username")
+    redis_client = Get_redis_client()
     OnlinePlayersListEncoded = await redis_client.get(OnlinePlayers)
     OnlinePlayersList = list(json.loads(OnlinePlayersListEncoded) if OnlinePlayersListEncoded else [])
     
@@ -61,7 +62,7 @@ async def inform_online(request):
         Username = await request.session.aget("Username")
 
         PlayerStatus = PlayerStatusFormat(Username, "Online", Gamemode="", Side="")
-
+        redis_client = Get_redis_client()
         OnlinePlayersList = list(json.loads(await redis_client.get(OnlinePlayers) or "[]"))
         OnlinePlayersList.append(PlayerStatus)
         await redis_client.set(OnlinePlayers, json.dumps(OnlinePlayersList))
@@ -118,6 +119,7 @@ async def PlayLocal(request):
 async def PlayMultiplayer(request):
     username_isExist = await request.session.ahas_key("Username")
     if username_isExist:
+        redis_client = Get_redis_client()
         Username = await request.session.aget("Username")
         PlayerConfig = json.loads(await redis_client.get(Username))
         if PlayerConfig is not None:
@@ -142,6 +144,7 @@ async def searchOpponent(request):
         form = SearchOpponentForm(request.POST)
         channel_layer = get_channel_layer()
         if form.is_valid():
+            redis_client = Get_redis_client()
             Side = form.cleaned_data["Side"]
             Gamemode = slugify(form.cleaned_data["Gamemode"])
             await request.session.aset("Gamemode", form.cleaned_data["Gamemode"])
@@ -182,6 +185,7 @@ async def openLobby(request):
         Username = await request.session.aget("Username")
         form = SearchOpponentForm(request.POST)
         if form.is_valid():
+            redis_client = Get_redis_client()
             Side = form.cleaned_data["Side"]
             Gamemode = slugify(form.cleaned_data["Gamemode"])
             LobbyList = list(json.loads(await redis_client.get(Gamemode) or "[]"))
@@ -216,6 +220,7 @@ async def joinLobby(request):
         if form.is_valid():
             HostSide = form.cleaned_data["HostSide"]
             PlayerHost = form.cleaned_data["PlayerHost"]
+            redis_client = Get_redis_client()
             #Set up opponentPlayer config
             await redis_client.set(PlayerHost, json.dumps(
                 {
