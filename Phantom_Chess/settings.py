@@ -148,3 +148,11 @@ CELERY_RESULT_BACKEND = 'rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaC
 
 CELERY_ACCEPT_CONTENT = ['json'] #Accept result in json only
 CELERY_TASK_SERIALIZER = 'json' #Send tasks in JSON format
+
+CORS_ALLOWED_ORIGINS = [
+    "https://mc230120384-phantomchess-cpc4crd4esbccyaa.malaysiawest-01.azurewebsites.net",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://mc230120384-phantomchess-cpc4crd4esbccyaa.malaysiawest-01.azurewebsites.net",
+]
+
