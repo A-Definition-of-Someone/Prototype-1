@@ -25,7 +25,7 @@ SECRET_KEY = 'p)k#cpc&#)nf4$-1e$6!z^(i#f5x23-pqc^0=yo)8@_w8faw3p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["mc230120384-phantomchess-cpc4crd4esbccyaa.malaysiawest-01.azurewebsites.net"]
 
 
 # Application definition
