@@ -142,12 +142,13 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("phantom-chess.redis.cache.windows.net", 6380)],
-            "password": "6Xuw0ogshvbmjktdNPwmLmKdR4nGHqVq9AzCaGfM8WE=",  # Get from Azure portal
-            "ssl": True,
-        },
-    },
+            "hosts": [
+                "rediss://:your@redis:6Xuw0ogshvbmjktdNPwmLmKdR4nGHqVq9AzCaGfM8WE=@phantom-chess.redis.cache.windows.net:6380/0"
+            ]
+        }
+    }
 }
+
 
 CELERY_BROKER_URL = "phantom-chess.redis.cache.windows.net:6380/0" #Send tasks to redis
 CELERY_RESULT_BACKEND = "phantom-chess.redis.cache.windows.net:6380/0" #Track result of tasks sent to redis
