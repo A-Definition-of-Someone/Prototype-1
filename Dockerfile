@@ -1,21 +1,26 @@
-# Use a slim Python image
-FROM python:3.11-slim
+# Use official Python image
+FROM python:3.13.6-slim-bookworm
 
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copy project files
-COPY . /app
+COPY . .
 
-# Install dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-# Expose Daphne port
+# Expose port
 EXPOSE 8000
 
-# Set Azure port environment variable
-ENV WEBSITES_PORT=8000
+# Run Daphne via startup script
+CMD ["bash", "startup.sh"]
 
-# Start Daphne with your ASGI app
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "Phantom_Chess.asgi:application"]

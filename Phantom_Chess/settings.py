@@ -31,7 +31,6 @@ ALLOWED_HOSTS = ["mc230120384-phantomchess-cpc4crd4esbccyaa.malaysiawest-01.azur
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'Game',
     'django.contrib.admin',
     'django.contrib.auth',
