@@ -143,15 +143,19 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [
-                "rediss://:your@redis:6Xuw0ogshvbmjktdNPwmLmKdR4nGHqVq9AzCaGfM8WE=@phantom-chess.redis.cache.windows.net:6380/0"
-            ]
-        }
-    }
+                "rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380"
+            ],
+        },
+    },
 }
 
 
-CELERY_BROKER_URL = "phantom-chess.redis.cache.windows.net:6380/0" #Send tasks to redis
-CELERY_RESULT_BACKEND = "phantom-chess.redis.cache.windows.net:6380/0" #Track result of tasks sent to redis
+CELERY_BROKER_URL = "rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/0" #Send tasks to redis
+CELERY_RESULT_BACKEND = "rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/0"  #Track result of tasks sent to redis
 
 CELERY_ACCEPT_CONTENT = ['json'] #Accept result in json only
 CELERY_TASK_SERIALIZER = 'json' #Send tasks in JSON format
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://phantom-chess-hbgrf4aba2b4d8g6.malaysiawest-01.azurewebsites.net"
+]

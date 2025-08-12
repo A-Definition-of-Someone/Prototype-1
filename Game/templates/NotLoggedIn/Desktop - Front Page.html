@@ -141,9 +141,12 @@ Select Players and then choose a player and click "Challenge" button to challeng
             if(OperationLogin.value !== "Login" && PlayerPassword.value !== PlayerPasswordAgain.value){
                 PromptAuthError1.innerText = "Auth Error: Password is not the same!";
                 PromptAuth.dataset.authStatus = "ERROR2";
+            }else if(OperationLogin.value.length < 8){
+                PromptAuthError1.innerText = "Auth Error: Minimum password length is 8!";
+                PromptAuth.dataset.authStatus = "ERROR2";
             }
             else{
-                let formData = new FormData(document.getElementById("Prompt-Auth"), OperationLogin);
+                let formData = new FormData(document.getElementById("Prompt-Auth"));
                 const url = (OperationLogin.value === "Login")? "/AuthLogin" : "/AuthSignup";
                 try {
                     const response = await fetch(url, {
@@ -161,7 +164,7 @@ Select Players and then choose a player and click "Challenge" button to challeng
                             window.location.replace("");
                         }
                     } catch (error) {
-                        PromptAuthError1.innerText = "Unable to send response!";
+                        PromptAuthError1.innerText = "Unable to send response!" + error;
                         PromptAuth.dataset.authStatus = "ERROR1";
                     }
                 }
@@ -272,8 +275,12 @@ Select Players and then choose a player and click "Challenge" button to challeng
             try {
                 const response = await fetch(url,{
                     method: "POST",
-                    headers: {'X-CSRFToken': csrftoken},
-                    mode: 'same-origin' // Do not send CSRF token to another domain.
+                    headers: {
+                        "Content-Type": "application/json",
+                        'X-CSRFToken': csrftoken
+                    },
+                    mode: 'same-origin', // Do not send CSRF token to another domain.
+                    body: JSON.stringify({})
                 });
 
                 const jsonObject = await response.json();
