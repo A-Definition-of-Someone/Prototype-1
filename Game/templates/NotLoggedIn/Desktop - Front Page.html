@@ -141,6 +141,8 @@ Select Players and then choose a player and click "Challenge" button to challeng
             if(OperationLogin.value !== "Login" && PlayerPassword.value !== PlayerPasswordAgain.value){
                 PromptAuthError1.innerText = "Auth Error: Password is not the same!";
                 PromptAuth.dataset.authStatus = "ERROR2";
+                console.log("Password1: " + PlayerPassword.value);
+                console.log("Password2: " + PlayerPasswordAgain.value);
             }else if(OperationLogin.value.length < 8){
                 PromptAuthError1.innerText = "Auth Error: Minimum password length is 8!";
                 PromptAuth.dataset.authStatus = "ERROR2";
