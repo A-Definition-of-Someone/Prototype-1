@@ -128,17 +128,29 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #https://channels.readthedocs.io/en/latest/tutorial/part_2.html
 ASGI_APPLICATION = 'Phantom_Chess.asgi.application'
+
+# CHANNEL_LAYERS = {
+#    "default": {
+#        "BACKEND": "channels_redis.core.RedisChannelLayer",
+#       "CONFIG": {
+#          "hosts": [("127.0.0.1", 6379)],
+#        },
+#    },
+#}
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("phantom-chess.redis.cache.windows.net", 6380)],
+            "password": "6Xuw0ogshvbmjktdNPwmLmKdR4nGHqVq9AzCaGfM8WE=",  # Get from Azure portal
+            "ssl": True,
         },
     },
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0' #Send tasks to redis
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0' #Track result of tasks sent to redis
+CELERY_BROKER_URL = "phantom-chess.redis.cache.windows.net:6380/0" #Send tasks to redis
+CELERY_RESULT_BACKEND = "phantom-chess.redis.cache.windows.net:6380/0" #Track result of tasks sent to redis
 
 CELERY_ACCEPT_CONTENT = ['json'] #Accept result in json only
 CELERY_TASK_SERIALIZER = 'json' #Send tasks in JSON format
