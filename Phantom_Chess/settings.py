@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-gpqvi7i^h=w8n7=p90eyp174g#swh+wl!y39qq)9eb=w_h*fyh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["phantom-chess-hbgrf4aba2b4d8g6.malaysiawest-01.azurewebsites.net","127.0.0.1"]
+ALLOWED_HOSTS = ["phantom-chess-hbgrf4aba2b4d8g6.malaysiawest-01.azurewebsites.net","127.0.0.1", "0.0.0.0"]
 
 
 # Application definition
