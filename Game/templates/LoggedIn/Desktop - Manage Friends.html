@@ -128,7 +128,7 @@
         /*Web Sockets*/
         /*Subscribe to Online Players List*/
         const PlayersOnlineSocket = new WebSocket(
-            "ws://" +
+            "wss://" +
             window.location.host +
             "/ws/OnlinePlayersList"
         );
@@ -152,7 +152,7 @@
         });
 
         let PlayerWebsocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-            "ws://" +
+            "wss://" +
             window.location.host +
             "/ws/Challenge/" + 
             "{{Username}}" +//This belongs to django template
@@ -184,7 +184,7 @@
         let OpenLobbyWebsocket = null;
 
         let FriendWebSocket = new WebSocket(
-            "ws://" +
+            "wss://" +
             window.location.host +
             "/ws/Friend/" + 
             "{{Username}}" +//This belongs to django template
@@ -647,7 +647,7 @@
                     PromptChallengeError.dataset.error = "2";
                     //Open Lobby Web Socket first
                     OpenLobbyWebsocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-                        "ws://" +
+                        "wss://" +
                         window.location.host +
                         "/ws/Matchmaking/" + 
                         "{{Username}}" + //This belongs to django template
@@ -699,7 +699,7 @@
         async function challengePlayer(Username, Gamemode){
             console.log("challengePlayer");
             OpponentPlayerWebSocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-                "ws://" +
+                "wss://" +
                 window.location.host +
                 "/ws/Challenge/" + 
                 Username + "/"

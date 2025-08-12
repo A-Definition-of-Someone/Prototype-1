@@ -102,7 +102,7 @@ Select Players and then choose a player and click "Challenge" button to challeng
 
         /*Web Socket*/
         let PlayerWebsocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-            "ws://" +
+            "wss://" +
             window.location.host +
             "/ws/Challenge/" + 
             "{{Username}}" +//This belongs to django template
@@ -192,7 +192,7 @@ Select Players and then choose a player and click "Challenge" button to challeng
 
         /*Subscribe to Online Players List*/
         const PlayersOnlineSocket = new WebSocket(
-            "ws://" +
+            "wss://" +
             window.location.host +
             "/ws/OnlinePlayersList"
         );
@@ -439,7 +439,7 @@ Select Players and then choose a player and click "Challenge" button to challeng
                     PromptChallengeError.dataset.error = "2";
                     //Open Lobby Web Socket first
                     OpenLobbyWebsocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-                        "ws://" +
+                        "wss://" +
                         window.location.host +
                         "/ws/Matchmaking/" + 
                         "{{Username}}" + //This belongs to django template
@@ -491,7 +491,7 @@ Select Players and then choose a player and click "Challenge" button to challeng
         async function challengePlayer(Username, Gamemode){
             console.log("challengePlayer");
             OpponentPlayerWebSocket = new WebSocket( //Connect to websocket dedicated to this player to listen to challenges sent by other players
-                "ws://" +
+                "wss://" +
                 window.location.host +
                 "/ws/Challenge/" + 
                 Username + "/"
