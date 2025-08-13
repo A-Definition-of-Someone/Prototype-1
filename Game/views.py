@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+from asgiref.sync import sync_to_async
 from Game.data_format import PlayerStatusFormat
 from Game.redis_client import Get_redis_client
 from Game.models import Account, History
@@ -148,6 +148,7 @@ async def searchOpponent(request):
             Side = form.cleaned_data["Side"]
             Gamemode = slugify(form.cleaned_data["Gamemode"])
             await request.session.aset("Gamemode", form.cleaned_data["Gamemode"])
+            await  sync_to_async(request.session.save)()
             LobbyList = list(json.loads(await redis_client.get(Gamemode) or "[]"))
             for opponent in LobbyList:
                 if opponent[1] != Side: #The opponent side is opposite ours
