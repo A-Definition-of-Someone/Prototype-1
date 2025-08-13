@@ -124,6 +124,17 @@ STORAGES = {
     },
 }
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 
 # Default primary key field type
