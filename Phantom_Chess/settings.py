@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -129,7 +130,7 @@ SESSION_CACHE_ALIAS = "default"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/0",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {
@@ -152,13 +153,13 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": ["rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380"],
+            "hosts": [os.environ.get("REDIS_URL", "redis://localhost:6379/0")],
         },
     },
 }
 
-CELERY_BROKER_URL = 'rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/0' #Send tasks to redis
-CELERY_RESULT_BACKEND = 'rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/0' #Track result of tasks sent to redis
+CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0") #Send tasks to redis
+CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://localhost:6379/0") #Track result of tasks sent to redis
 
 CELERY_ACCEPT_CONTENT = ['json'] #Accept result in json only
 CELERY_TASK_SERIALIZER = 'json' #Send tasks in JSON format

@@ -1,6 +1,7 @@
+import os
 import redis.asyncio as redis
 
 
 def Get_redis_client():
-    pool = redis.ConnectionPool.from_url("rediss://default:uUCHAt4tWjYGh6Ody3Tc3FnwZR2ESVeDRAzCaCOR9Vc=@phantom-chess.redis.cache.windows.net:6380/0")
+    pool = redis.ConnectionPool.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379/0"))
     return redis.Redis(connection_pool=pool)
