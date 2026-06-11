@@ -1,0 +1,133 @@
+a{
+    text-decoration: none;
+}
+
+#Menu{
+    display: grid;
+    grid-area: Menu;
+    grid-auto-flow: row;
+    grid-template-rows: minmax(0, 0.6fr) minmax(0, 0.1fr) minmax(0, 0.5fr) minmax(0, 0.5fr) minmax(0, 0.5fr) minmax(0, 5.1fr) minmax(0,0.35fr) minmax(0, 0.1fr);
+    gap: 5px;
+    background-color: cornflowerblue;
+    font-family: var(--FontFamilyMain);
+    font-weight: bold;
+    text-align: center;
+}
+
+#Menu[data-collapse = "1"] #Menu-CollapseBTN{
+    width: 35%;
+}
+
+#Menu[data-collapse = "1"] #Menu-CollapseBTN::after{
+    content: "➡️";
+}
+
+#Menu-Title{
+    display: grid;
+    width: 80%;
+    height: 100%;
+    grid-auto-flow: column;
+    grid-template-columns: minmax(0, 0.4fr) minmax(0, 1fr);
+    grid-template-rows: 100%;
+    place-self: center center;
+}
+
+#Menu-Title img{
+    width: auto;
+    height: 70%;
+    place-self: center center;
+}
+
+#Menu[data-collapse = "1"] #Menu-Title  img{
+    grid-column: span 2;
+}
+
+#Menu-Title  span{
+    width: 100%;
+    color: white;
+    place-self: center start;
+    font-size: var(--FontSizeApprox17PX);
+}
+
+#Menu[data-collapse = "1"] #Menu-Title  span{
+    display: none;
+    width: 0;
+}
+
+.Menu-Option{
+    display: grid;
+    grid-template-rows: 100%;
+    height: 100%;
+    width: 95%;
+    background-color: beige;
+    font-size: var(--FontSizeApprox19PX);
+    place-self: center center;
+    color: black;
+    cursor: pointer;
+}
+
+#Menu[data-collapse = "1"] .Menu-Option{
+    background-color: transparent;
+}
+
+.Menu-Option:nth-child(3){
+    grid-template-columns:  minmax(0, 1fr) minmax(0, 3fr) ;
+}
+
+.Menu-Option:nth-child(4){
+    grid-template-columns:  minmax(0, 1fr) minmax(0, 2.5fr) ;
+}
+
+.Menu-Option:nth-child(5){
+    grid-template-columns:  minmax(0, 1fr) minmax(0, 2.7fr) ;
+}
+
+.Menu-Option > span{
+    place-self: center center;
+    text-align: center;
+}
+
+#Menu[data-collapse = "1"] .Menu-Option span{
+    display: none;
+    width: 0;
+}
+.Menu-Option > img{
+    place-self: center center;
+}
+#Menu[data-collapse = "1"] .Menu-Option img{
+    grid-column: span 2;
+    place-self: center center;
+}
+/*3 - 5 because we're handling 3rd till 5th div under parent container*/
+.Menu-Option:nth-child(3) > img{
+    max-height: 4.5vmin;
+    width: auto;
+    place-self: center end;
+}
+.Menu-Option:nth-child(4) > img{
+    max-height: 3vmin;
+    width: auto;
+    place-self: center end;
+}
+.Menu-Option:nth-child(5) > img{
+    max-height: 4.5vmin;
+    width: auto;
+    place-self: center end;
+}
+
+#Menu-CollapseBTN{
+    display: grid;
+    place-content: center center;
+    place-self: center center;
+    height: 100%;
+    width: 65%;
+    background-color: beige;
+    text-align: center;
+    color: black;
+    cursor: pointer;
+    font-size: var(--FontSizeApprox17PX);
+}
+
+#Menu-CollapseBTN::after{
+    content: "⬅️ Collapse Menu";
+}
